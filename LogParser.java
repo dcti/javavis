@@ -256,7 +256,7 @@ class LogParser
                 //System.out.println("Year Roll-Over Time : "+new Date(ge.timestamp*100)+" "+logdata.size());
                 //System.out.println("line " + logline1.substring(1));
             }
-            System.out.println("got timestamp " + ge.timestamp);
+            //System.out.println("got timestamp " + ge.timestamp);
             lastTimeStamp = ge.timestamp;
 
             // parse project.
@@ -267,7 +267,7 @@ class LogParser
                 // "Completed RC5"
                 ge.project = ParseProject(new StringCharacterIterator(logline1, compoffset+9));
             }
-            System.out.println("got project " + ge.project);
+            //System.out.println("got project " + ge.project);
 
             // parse workunit count (keycount).
             int keyoffset = logline1.indexOf('(');
@@ -279,23 +279,23 @@ class LogParser
                 } else {
                     ge.keycount = (long) workfloat;
                 }
-                System.out.println("got keycount1 " + ge.keycount);
+                //System.out.println("got keycount1 " + ge.keycount);
             } else {
                 ge.keycount = (long) ConvertDecimalInteger(new StringCharacterIterator(logline1, keyoffset));
-                System.out.println("got keycount2 " + ge.keycount);
+                //System.out.println("got keycount2 " + ge.keycount);
             }
 
             // parse the keyrate.
             int rateoffset = logline2.lastIndexOf('[');
             if (rateoffset < 0) return false;
             ge.rate = (float) ConvertDecimalFloat(new StringCharacterIterator(logline2, rateoffset));
-            System.out.println("got keyrate " + ge.rate);
+            //System.out.println("got keyrate " + ge.rate);
 
             // parse duration.
             int duroffset = logline2.lastIndexOf(' ', rateoffset - 4);
             if (duroffset < 0) return false;
             ge.duration = ParseDuration(new StringCharacterIterator(logline2, duroffset));
-            System.out.println("got duration " + ge.duration);
+            //System.out.println("got duration " + ge.duration);
 
 
             // successful parse complete.
