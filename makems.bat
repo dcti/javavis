@@ -6,7 +6,7 @@ rem http://www.microsoft.com/java/download/dl_sdk40.htm
 if exist *.class del *.class
 if exist *.jar del *.jar
 
-"D:\Program Files\Microsoft SDK for Java 4.0\Bin\jvc" /cp:p . RC5graph.java
+"D:\Program Files\Microsoft SDK for Java 4.0\Bin\jvc" /cp:p . JavaVis.java
 
 if errorlevel 1 goto end
 jar cvfm JavaVis.jar MANIFEST.MF *.class *.gif

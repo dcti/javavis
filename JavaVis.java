@@ -1,4 +1,4 @@
-// Copyright distributed.net 1997-1999 - All Rights Reserved
+// Copyright distributed.net 1997-2000 - All Rights Reserved
 // For use in distributed.net projects only.
 // Any other distribution or use of this source violates copyright.
 //
@@ -12,7 +12,7 @@ import java.awt.event.*;
 //import com.apple.mrj.*;                 // MacOS MRJ
 
 // Main Frame
-class RC5graph extends Frame
+class JavaVis extends Frame
 //implements MRJAboutHandler, MRJOpenDocumentHandler, MRJQuitHandler      // MacOS MRJ
 {
     GraphPanel graphPanel;
@@ -21,7 +21,7 @@ class RC5graph extends Frame
     MenuItem refreshItem;
 
     // Constructor
-    public RC5graph(String title)
+    public JavaVis(String title)
     {
         // Parent Constructor
         super(title);
@@ -135,7 +135,7 @@ class RC5graph extends Frame
     public static void main(String[] args)
     {
         // Create the top-level container and add contents to it.
-        final RC5graph app = new RC5graph("distributed.net Logfile Visualizer");
+        final JavaVis app = new JavaVis("distributed.net Logfile Visualizer");
         Component contents = app.createComponents();
         //app.getContentPane().add(contents, BorderLayout.CENTER);
         app.setBackground(Color.lightGray);

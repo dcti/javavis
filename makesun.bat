@@ -5,7 +5,7 @@ rem http://java.sun.com/j2se/1.3/
 
 if exist *.class del *.class
 if exist *.jar del *.jar
-javac -classpath . RC5graph.java
+javac -classpath . JavaVis.java
 if errorlevel 1 goto end
 jar cvfm JavaVis.jar MANIFEST.MF *.class *.gif
 
