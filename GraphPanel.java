@@ -137,22 +137,6 @@ public class GraphPanel extends JPanel
         for (double r = minrate + yinterval; r < maxrate; r += yinterval) {
             g.drawLine((int) timelo, (int) r, (int) timehi, (int) r);
         }
-        
-        // start drawing the points.
-        g.setColor(Color.red);
-        try {
-            ListIterator listiter = logdata.listIterator();
-            while (listiter.hasNext())
-            {
-                GraphEntry ge = (GraphEntry) listiter.next();
-// more here.
-            }
-        }
-        catch (NoSuchElementException e) { }
-        
-                
-            
-
 
 /*
   HPEN graphline = CreatePen(PS_SOLID, 2, RGB(0x99, 0x33, 0x33));
@@ -235,8 +219,58 @@ public class GraphPanel extends JPanel
   SelectObject(dc, oldfont);
   DeleteObject(rotatedfont);
         
-*/    
-        
+*/
+
+        // start drawing the points.
+        g.setColor(Color.red);
+        try {
+            boolean firstpoint = true;
+        	long lasttime = 0;
+        	int lastx = 0, lasty = 0;
+            
+            ListIterator listiter = logdata.listIterator();
+            while (listiter.hasNext())
+            {
+                GraphEntry ge = (GraphEntry) listiter.next();
+
+                if (ge.timestamp >= timelo &&
+                    ge.timestamp <= timehi &&
+                    ge.rate >= minrate &&
+                    ge.rate <= maxrate)
+                {
+            		// convert to screen coords
+            		int tmpx = leftBorder + (int) ((float) width *
+            		    (float) (ge.timestamp - timelo) / (float) (timehi - timelo));
+            		int tmpy = topBorder + height - (int) ((float) height *
+            		    (float) (ge.rate - minrate) / (float) (maxrate - minrate));
+
+
+                    if (!firstpoint)
+                    {
+                        if ((ge.timestamp - lasttime) > 300 + 1.25 * ge.duration)
+                        {
+                            // There was a significant lapse in time since the last point,
+                            // which probably indicates that the client was turned off for
+                            // awhile, so draw a "drop" in the keyrate graph.
+                            g.drawLine(lastx, lasty, lastx, topBorder + height);
+                            g.drawLine(lastx, topBorder + height, tmpx, topBorder + height);
+                            g.drawLine(tmpx, topBorder + height, tmpx, tmpy);
+                        }
+                        else
+                        {
+                            // otherwise just connect the line from the last one.
+                            g.drawLine(lastx, lasty, tmpx, tmpy);
+                        }
+                    }
+                    lastx = tmpx;
+                    lasty = tmpy;
+                    lasttime = ge.timestamp;
+                    firstpoint = false;
+                }
+            }
+        }
+        catch (NoSuchElementException e) { }
+
         // Done!
         return;
     }
@@ -274,7 +308,7 @@ System.out.println("load in progress");
                 }
             }
             catch (NoSuchElementException e) { }
-            
+
             loggerstate = logloaded;
             repaint();
 System.out.println("load complete.  numrecords=" + logdata.size());
@@ -306,46 +340,4 @@ System.out.println("load complete.  numrecords=" + logdata.size());
         p.start();
         repaint();
     }
-
-
-
-/*
-public void IterDrawFuncRate(GraphEntry datapoint, void *vptr)
-{
-  MyPaintStruct *paintstr = (MyPaintStruct*)vptr;
-  if ((datapoint.timestamp >= paintstr->mintime) &&
-      (datapoint.timestamp <= paintstr->maxtime))
-  { 
-    POINT point = paintstr->PointToClientCoords(datapoint.timestamp, datapoint.rate);
-    if (paintstr->firstpoint)
-    {
-      // this is the first point being drawn.
-      MoveToEx(paintstr->dc, point.x, point.y, NULL);
-      paintstr->firstpoint = false;
-    }
-    else if ((datapoint.timestamp - paintstr->lasttime) > 300 + 1.25 * datapoint.duration)
-    {
-      // There was a significant lapse in time since the last point,
-      // which probably indicates that the client was turned off for
-      // awhile, so draw a "drop" in the keyrate graph.
-      POINT point1 = paintstr->PointToClientCoords((long)(paintstr->lasttime + 0.25 * datapoint.duration), 0);
-      POINT point2 = paintstr->PointToClientCoords((long)(datapoint.timestamp - 0.25 * datapoint.duration), 0);
-      LineTo(paintstr->dc, point1.x, point1.y);
-      LineTo(paintstr->dc, point2.x, point2.y);
-      LineTo(paintstr->dc, point.x, point.y);
-    }
-    else
-    {
-      // otherwise just connect the line from the last one.
-      LineTo(paintstr->dc, point.x, point.y);
-    }
-    paintstr->lasttime = datapoint.timestamp;
-    paintstr->lastrate = datapoint.rate;
-  }
-}
-*/
-
-
-
-
 }
