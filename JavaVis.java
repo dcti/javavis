@@ -9,16 +9,31 @@
 import java.io.File;
 import java.awt.*;
 import java.awt.event.*;
-//import com.apple.mrj.*;                 // MacOS MRJ
+
+import com.apple.mrj.*; // MRJToolkitStubs.zip provides empty declarations to link against
+
+class MacOSMRJToolkitFrame extends JavaVis implements MRJAboutHandler, MRJOpenDocumentHandler, MRJQuitHandler
+{
+    public MacOSMRJToolkitFrame(String title)
+    {
+        // Parent Constructor
+        super(title);
+        
+        // Register ourselves with MacOS Runtime for Java (MRJ) system event handlers
+        MRJApplicationUtils.registerAboutHandler(this);
+        MRJApplicationUtils.registerQuitHandler(this);
+        MRJApplicationUtils.registerOpenDocumentHandler(this);   
+    }
+}
 
 // Main Frame
-class JavaVis extends Frame
-//implements MRJAboutHandler, MRJOpenDocumentHandler, MRJQuitHandler      // MacOS MRJ
+public class JavaVis extends Frame
 {
     GraphPanel graphPanel;
     final AboutDialog aboutDialog = new AboutDialog(this);
     final LogFileHistory lfh;
     MenuItem refreshItem;
+    static String[] arguments;
 
     // Constructor
     public JavaVis(String title)
@@ -98,24 +113,50 @@ class JavaVis extends Frame
         menuItem.setShortcut(new MenuShortcut(KeyEvent.VK_Q));
         menu.add(menuItem);
 
-        menu = new Menu("Help");
+        
+        // If MRJToolkit is available then we provide the About Box in the Apple Menu
+        if (!MRJApplicationUtils.isMRJToolkitAvailable()) {
 
-        menuItem = new MenuItem("About JavaVis...");
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                handleAbout();
+            menu = new Menu("Help");
+
+            menuItem = new MenuItem("About JavaVis...");
+            menuItem.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    handleAbout();
+                }
+            });
+            menuItem.setShortcut(new MenuShortcut(KeyEvent.VK_A));
+            menu.add(menuItem);
+            try {
+                menuBar.setHelpMenu(menu);
+                // avoid the double Help menu problem on Mac OS 8 and later
+            } catch (Throwable thrown) {
+                // in case we are on an older JDK which doesn't support this function
+                // fall back on old strategy
+                menuBar.add(menu);
+            }
+        }
+        
+        Component contents = createComponents();
+        //getContentPane().add(contents, BorderLayout.CENTER);
+        setBackground(Color.lightGray);
+        add(contents, BorderLayout.CENTER);
+        add("West",new leftPanel());
+        add("South",new Label("Work Unit completion date",Label.CENTER));
+
+        // Finish setting up the frame, and show it.
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                handleQuit();
             }
         });
-        menuItem.setShortcut(new MenuShortcut(KeyEvent.VK_A));
-        menu.add(menuItem);
-        try {
-            menuBar.setHelpMenu(menu);
-            // avoid the double Help menu problem on Mac OS 8 and later
-        } catch (Throwable thrown) {
-            // in case we are on an older JDK which doesn't support this function
-            // fall back on old strategy
-            menuBar.add(menu);
+        pack();
+        setVisible(true);
+
+        if (arguments.length >= 1) {
+            handleOpenFile(new File(arguments[0]));
         }
+        
     }
 
     public Component createComponents()
@@ -134,28 +175,15 @@ class JavaVis extends Frame
 
     public static void main(String[] args)
     {
-        // Create the top-level container and add contents to it.
-        final JavaVis app = new JavaVis("distributed.net Logfile Visualizer");
-        Component contents = app.createComponents();
-        //app.getContentPane().add(contents, BorderLayout.CENTER);
-        app.setBackground(Color.lightGray);
-        app.add(contents, BorderLayout.CENTER);
-        app.add("West",new leftPanel());
-        app.add("South",new Label("Work Unit completion date",Label.CENTER));
-
-        // Finish setting up the frame, and show it.
-        app.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                app.handleQuit();
-            }
-        });
-        app.pack();
-        app.setVisible(true);
-        //MRJApplicationUtils.registerAboutHandler(app);  // MacOS MRJ
-        //MRJApplicationUtils.registerQuitHandler(app);           // MacOS MRJ
-        //MRJApplicationUtils.registerOpenDocumentHandler(app);           // MacOS MRJ
-        if (args.length >= 1) {
-            app.handleOpenFile(new File(args[0]));
+        arguments = args;
+        
+        if (MRJApplicationUtils.isMRJToolkitAvailable()) {
+            // Create the top-level container and add contents to it.
+            final MacOSMRJToolkitFrame app = new MacOSMRJToolkitFrame("distributed.net Logfile Visualizer");
+		  }
+		  else {
+            // Create the top-level container and add contents to it.
+            final JavaVis app = new JavaVis("distributed.net Logfile Visualizer");
         }
     }
 

@@ -5,8 +5,8 @@ rem http://java.sun.com/j2se/1.3/
 
 if exist *.class del *.class
 if exist *.jar del *.jar
-javac -classpath . JavaVis.java
+javac -O -classpath .;./MRJToolkitStubs.zip JavaVis.java
 if errorlevel 1 goto end
-jar cvfm JavaVis.jar MANIFEST.MF *.class *.gif
+jar cvfm JavaVis.jar MANIFEST.MF *.class *.gif *.zip
 
 :end

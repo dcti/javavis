@@ -9,6 +9,6 @@ if exist *.jar del *.jar
 jvc /cp:p . JavaVis.java
 
 if errorlevel 1 goto end
-jar cvfm JavaVis.jar MANIFEST.MF *.class *.gif
+jar cvfm JavaVis.jar MANIFEST.MF *.class *.gif *.zip
 
 :end
