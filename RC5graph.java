@@ -32,16 +32,22 @@ public class RC5graph extends JFrame
         menuBar.add(menu);
         
         menuItem = new JMenuItem("Open log file...");
+	final FileDialog fileDialog = new FileDialog(this);
         menuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 // Create a file chooser
-                final JFileChooser fc = new JFileChooser();
+		fileDialog.setMode(FileDialog.LOAD);
+		fileDialog.show();
+
                 // In response to a button click:
-                int returnVal = fc.showOpenDialog(RC5graph.this);
-                if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    File file = fc.getSelectedFile();
-                    graphPanel.currentLogFile = file;
-                    graphPanel.readLogData();
+		String filename = fileDialog.getFile();
+		if (filename != null) {
+                    File file = new File(fileDialog.getDirectory(), filename);
+			if (file.exists())
+			{
+	                    graphPanel.currentLogFile = file;
+        	            graphPanel.readLogData();
+			}
                 }
                 
             }
