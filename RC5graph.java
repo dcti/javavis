@@ -6,7 +6,6 @@
 import java.io.File;
 import java.awt.*;
 import java.awt.event.*;
-//import javax.swing.*;
 
 // Main Frame
 public class RC5graph extends Frame
@@ -32,22 +31,22 @@ public class RC5graph extends Frame
         menuBar.add(menu);
 
         menuItem = new MenuItem("Open log file...");
-	final FileDialog fileDialog = new FileDialog(this);
+        final FileDialog fileDialog = new FileDialog(this);
         menuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 // Create a file chooser
-		fileDialog.setMode(FileDialog.LOAD);
-		fileDialog.show();
+                fileDialog.setMode(FileDialog.LOAD);
+                fileDialog.show();
 
                 // In response to a button click:
-		String filename = fileDialog.getFile();
-		if (filename != null) {
+                String filename = fileDialog.getFile();
+                if (filename != null) {
                     File file = new File(fileDialog.getDirectory(), filename);
-			if (file.exists())
-			{
-	                    graphPanel.currentLogFile = file;
-        	            graphPanel.readLogData();
-			}
+                    if (file.exists())
+                    {
+                        graphPanel.currentLogFile = file;
+                        graphPanel.readLogData();
+                    }
                 }
 
             }
@@ -83,33 +82,22 @@ public class RC5graph extends Frame
         // Create an internal panel to hold the graph
         graphPanel = new GraphPanel()
         {
-        	public Dimension getPreferredSize()
-        	{
-        		return new Dimension(620,320);
-        	}
+            public Dimension getPreferredSize()
+            {
+                return new Dimension(620,320);
+            }
         };
-/*        Dimension myPreferredSize = new Dimension( 620, 320 );
-        graphPanel.setPreferredSize(myPreferredSize);
-        graphPanel.setBackground(Color.lightGray);*/
-//        graphPanel.setLayout(new GridLayout(0, 1));
 
         return graphPanel;
     }
 
     public static void main(String[] args)
     {
-        // Set the style.
-/*        try {
-            UIManager.setLookAndFeel(
-//                UIManager.getCrossPlatformLookAndFeelClassName()
-                UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) { }*/
-
         // Create the top-level container and add contents to it.
         RC5graph app = new RC5graph("distributed.net Logfile Visualizer");
         Component contents = app.createComponents();
 //        app.getContentPane().add(contents, BorderLayout.CENTER);
-		app.setBackground(Color.lightGray);
+        app.setBackground(Color.lightGray);
         app.add(contents, BorderLayout.CENTER);
         app.add("West",new leftPanel());
         app.add("South",new Label("Work Unit completion date",Label.CENTER));
