@@ -5,9 +5,8 @@ be known to Jeff Lawson <bovine@distributed.net>
 
 ==========
 
-- add acceptance of log filename to load on the command line.
-
-- add a "Refresh" menu item to the "File" menu.
+- graph performance on several contests at the same time with a different 
+color for each.
 
 - add a "Status bar" and display the progress/notification messages
 there, instead of painting them within the graph window.
