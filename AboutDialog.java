@@ -48,11 +48,9 @@ class AboutDialog extends Dialog
         gbc.fill = GridBagConstraints.NONE;
         add(new OKButton(), gbc);
 
-        if (getClass().getClassLoader() != null) {
-            URL res = getClass().getClassLoader().getResource("cowhead.gif");
-            if (res != null) {
-                Cow = getToolkit().getImage(res);
-            }
+        URL res = getClass().getResource("cowhead.gif");
+        if (res != null) {
+            Cow = getToolkit().getImage(res);
         }
     }
 
