@@ -115,6 +115,10 @@ implements MouseMotionListener, MouseListener,ActionListener
 
     public void mouseReleased(MouseEvent e)
     {
+        if (width <= 0 || height <= 0)
+        {
+          return; // don't do anything if we don't have graph data
+        }
         if (e.isPopupTrigger())
         {
             PopupMenu pm = new PopupMenu("Zoom");
