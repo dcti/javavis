@@ -204,6 +204,9 @@ public class LogParser
             (float) mins * (float) 60.0 + (float) secs);
     }
 
+
+    long lastTimeStamp = 0;
+    long addValue = 0;
     // returns true if successfully parsed.
     public boolean ParseLogEntry(String logline1, String logline2, GraphEntry ge)
         // ge is modified, by reference.
@@ -214,7 +217,15 @@ public class LogParser
                 return false;
 
             // parse timestamp.
-            ge.timestamp = ParseTimestamp(logline1.substring(1));
+            ge.timestamp = ParseTimestamp(logline1.substring(1))+addValue;
+            if (ge.timestamp < lastTimeStamp)
+            {
+                // 1 Year
+                addValue += 864000*365;
+                ge.timestamp += addValue;
+            }
+            lastTimeStamp = ge.timestamp;
+
 
 //System.out.println("got timestamp " + ge.timestamp);
 
