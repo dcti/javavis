@@ -1,14 +1,19 @@
+// Copyright distributed.net 1997-1999 - All Rights Reserved
+// For use in distributed.net projects only.
+// Any other distribution or use of this source violates copyright.
+//
 
 import java.lang.*;
 import java.text.*;
+import java.io.*;
 import java.util.Date;
-
+import java.util.List;
 
 
 public class LogParser
 {
 	private BufferedReader logfile;
-	private TDoubleListImp logdata;
+	private List logdata;
 
 	
 //   [Dec 16 03:25:59 UTC] Completed CSC packet 00205AE7:80000000 (4*2^28 keys)
@@ -21,32 +26,33 @@ public class LogParser
 //   [Jul 18 03:00:57 GMT] 0.01:59:18.82 - [299,977.15 keys/sec]
 	
 	
-	public LogParser(BufferedReader br, TDoubleListImp list) {
+	public LogParser(BufferedReader br, List list)
+	{
 		logfile = br;
 		logdata = list;
 	}
 	
-	public void run() {
+	public void run()
+	{
+		GraphEntry ge = new GraphEntry();
+	    String s1 = null, s2 = null;
 		
-		while(logfile.ready()) {
+		try {
+    		while(logfile.ready())
+    		{
+    			s2 = logfile.readLine();
 			
-			GraphEntry ge = new GraphEntry();
-			
-			try {
-				String s1 = logfile.readLine();
-				String s2 = logfile.readLine();
-			}
-			catch (IOException e) {
-				System.out.println("LogParser.run(): " + e);
-				break;
-			}
-			
-			if (ParseLogEntry(s1, s2, ge))
-				logdata.AddAtTail(ge);
-			else break;
+    			if (ParseLogEntry(s1, s2, ge)) {
+    				logdata.add(ge);
+    				ge = new GraphEntry();
+    			}
+
+    		    s1 = s2;
+    		}
 		}
-		
-		
+		catch (IOException e) {
+			System.out.println("LogParser.run(): " + e);
+		}
 	}
 
 	// Implements a custom decimal string parser for the StringCharacterIterator
@@ -90,6 +96,7 @@ public class LogParser
 
     // returns true if successfully parsed.
 	private boolean ParseTimestamp(String stamp, GraphEntry ge)
+	    // ge is modified, by reference.
     {
         int tm_mon, tm_mday, tm_year, tm_hour, tm_min, tm_sec;
         try {
@@ -142,12 +149,16 @@ public class LogParser
         {
             return false;
         }
+        
+        // Convert to seconds past epoc.
+        // This uses a deprecated API, but it is still useful.
         ge.timestamp = Date.UTC(tm_year - 1900, tm_mon - 1,
                 tm_mday, tm_hour, tm_min, tm_sec) / 100;
         return true;
     }
 
     // returns true if successfully parsed.
+        // ge is modified, by reference.
     public boolean ParseDuration(String stamp, GraphEntry ge)
     {
         int days, hours, mins;
@@ -179,7 +190,8 @@ public class LogParser
     }
 
     // returns true if successfully parsed.
-    public boolean ParseLogLine(String logline1, String logline2, GraphEntry ge)
+    public boolean ParseLogEntry(String logline1, String logline2, GraphEntry ge)
+        // ge is modified, by reference.
     {
         try
         {
@@ -193,7 +205,7 @@ public class LogParser
             // parse keycount.
             int keyoffset = logline1.indexOf('(');
             if (keyoffset < 0) return false;
-            this.keycount = Long.parseLong(logline1.substring(keyoffset + 1));
+            ge.keycount = Long.parseLong(logline1.substring(keyoffset + 1));
             
             // parse the keyrate.
             int rateoffset = logline2.lastIndexOf('[');
@@ -204,12 +216,15 @@ public class LogParser
                 ratestr = ratestr.substring(0, rateoffset) +
                     ratestr.substring(rateoffset + 1);
             }
-            this.rate = (float) Float.valueOf(ratestr).floatValue();
+            ge.rate = (float) Float.valueOf(ratestr).floatValue();
 
             // parse duration.
             int duroffset = logline2.lastIndexOf(' ', rateoffset - 4);
             if (duroffset < 0) return false;
-            if (!ParseDuration(logline2.substring(duroffset + 1), ge)) return false;
+            if (!ParseDuration(logline2.substring(duroffset + 1), ge))
+                return false;
+
+            // successful parse complete.
             return true;
         }
         catch (Exception E) {
