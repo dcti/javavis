@@ -104,7 +104,12 @@ implements MouseMotionListener, MouseListener,ActionListener
         if (e.isPopupTrigger())
         {
             PopupMenu pm = new PopupMenu("Zoom");
+            MenuItem mi = new MenuItem("complete");
+            mi.addActionListener(this);
+            pm.add(mi);
+            add(pm);
             pm.show(this,e.getX(),e.getY());
+//            pm.show(this,e.getX(),e.getY());
 //            System.out.println("popup");
         } else {
             startx = e.getX();
@@ -193,11 +198,22 @@ implements MouseMotionListener, MouseListener,ActionListener
         paint(getGraphics());
     }
 
+    java.awt.Image img;
+    int iwidth = -1;
+    int iheight = -1;
+
     public synchronized void paint(Graphics bg)
     {
         Dimension d = getSize();
-        java.awt.Image img = createImage(d.width,d.height);
+        if ( (img == null) || (d.width != iwidth) || (d.height != iheight) )
+        {
+          img = null;
+          img = createImage(d.width,d.height);
+          iwidth = d.width;
+          iheight = d.height;
+        }
         Graphics g = img.getGraphics();
+        g.clearRect(0,0,iwidth,iheight);
 
         if (loggerstate == loadinprogress) {
             g.drawString("Please wait, currently reloading log file.",
@@ -378,6 +394,7 @@ implements MouseMotionListener, MouseListener,ActionListener
 
         g.finalize();
         bg.drawImage(img,0,0,null);
+        img = null;
         // Done!
         return;
     }
@@ -454,3 +471,4 @@ implements MouseMotionListener, MouseListener,ActionListener
         repaint();
     }
 }
+
