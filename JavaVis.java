@@ -113,10 +113,9 @@ public class JavaVis extends Frame
         menuItem.setShortcut(new MenuShortcut(KeyEvent.VK_Q));
         menu.add(menuItem);
 
-        
-        // If MRJToolkit is available then we provide the About Box in the Apple Menu
-        if (!MRJApplicationUtils.isMRJToolkitAvailable()) {
-
+        if (MRJApplicationUtils.isMRJToolkitAvailable() && System.getProperty("os.name").equals("Mac OS")) {
+            // Under "Mac OS" (!="Mac OS X") the "About box" is provided by the MRJApplicationUtils
+        } else {
             menu = new Menu("Help");
 
             menuItem = new MenuItem("About JavaVis...");
