@@ -216,13 +216,16 @@ public class LogParser
             if (!logline1.startsWith("[") || logline1.indexOf("] Completed ") < 0)
                 return false;
 
+//System.out.println("line " + logline1.substring(1));
             // parse timestamp.
             ge.timestamp = ParseTimestamp(logline1.substring(1))+addValue;
-            if (ge.timestamp < lastTimeStamp)
+            if ((ge.timestamp-lastTimeStamp) < -8640000)
             {
                 // 1 Year
                 addValue += 864000*365;
-                ge.timestamp += addValue;
+                ge.timestamp += 864000*365;
+                //System.out.println("Year Roll-Over Time : "+new Date(ge.timestamp*100)+" "+logdata.size());
+                //System.out.println("line " + logline1.substring(1));
             }
             lastTimeStamp = ge.timestamp;
 
