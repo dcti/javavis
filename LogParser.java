@@ -12,10 +12,10 @@ import java.util.List;
 
 public class LogParser
 {
-	private BufferedReader logfile;
-	private List logdata;
+    private BufferedReader logfile;
+    private List logdata;
 
-	
+
 //   [Dec 16 03:25:59 UTC] Completed CSC packet 00205AE7:80000000 (4*2^28 keys)
 //                         0.00:22:46.15 - [786,534.65 keys/sec]
 //   [03/18/98 19:59:39 GMT] Completed block 00002752:E8100000 (2097152 keys)
@@ -24,40 +24,40 @@ public class LogParser
 //                        0.00:19:29.52 - [918103.14 keys/sec]
 //   [Jul 18 03:00:57 GMT] Completed RC5 block 6DE46FD9:00000000 (2147483648 keys)
 //   [Jul 18 03:00:57 GMT] 0.01:59:18.82 - [299,977.15 keys/sec]
-	
-	
-	public LogParser(BufferedReader br, List list)
-	{
-		logfile = br;
-		logdata = list;
-	}
-	
-	public void run()
-	{
-		GraphEntry ge = new GraphEntry();
-	    String s1 = null, s2 = null;
-		
-		try {
-    		while(logfile.ready())
-    		{
-    			s2 = logfile.readLine();
-			
-    			if (ParseLogEntry(s1, s2, ge)) {
-    				logdata.add(ge);
-    				ge = new GraphEntry();
-    			}
 
-    		    s1 = s2;
-    		}
-		}
-		catch (IOException e) {
-			System.out.println("LogParser.run(): " + e);
-		}
-	}
 
-	// Implements a custom decimal string parser for the StringCharacterIterator
-	// class, that allows our caller to easily continue parsing after the
-	// last character in the parsed string.
+    public LogParser(BufferedReader br, List list)
+    {
+        logfile = br;
+        logdata = list;
+    }
+
+    public void run()
+    {
+        GraphEntry ge = new GraphEntry();
+        String s1 = null, s2 = null;
+
+        try {
+            while(logfile.ready())
+            {
+                s2 = logfile.readLine();
+
+                if (ParseLogEntry(s1, s2, ge)) {
+                    logdata.add(ge);
+                    ge = new GraphEntry();
+                }
+
+                s1 = s2;
+            }
+        }
+        catch (IOException e) {
+            System.out.println("LogParser.run(): " + e);
+        }
+    }
+
+    // Implements a custom decimal string parser for the StringCharacterIterator
+    // class, that allows our caller to easily continue parsing after the
+    // last character in the parsed string.
     private int ConvertDecimalInteger(StringCharacterIterator sci)
             throws ParseException
         // sci is modified, by reference.
@@ -95,8 +95,8 @@ public class LogParser
     }
 
     // returns true if successfully parsed.
-	private boolean ParseTimestamp(String stamp, GraphEntry ge)
-	    // ge is modified, by reference.
+    private boolean ParseTimestamp(String stamp, GraphEntry ge)
+        // ge is modified, by reference.
     {
         int tm_mon, tm_mday, tm_year, tm_hour, tm_min, tm_sec;
         try {
@@ -149,7 +149,7 @@ public class LogParser
         {
             return false;
         }
-        
+
         // Convert to seconds past epoc.
         // This uses a deprecated API, but it is still useful.
         ge.timestamp = Date.UTC(tm_year - 1900, tm_mon - 1,
@@ -206,7 +206,7 @@ public class LogParser
             int keyoffset = logline1.indexOf('(');
             if (keyoffset < 0) return false;
             ge.keycount = Long.parseLong(logline1.substring(keyoffset + 1));
-            
+
             // parse the keyrate.
             int rateoffset = logline2.lastIndexOf('[');
             if (rateoffset < 0) return false;

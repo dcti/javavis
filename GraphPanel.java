@@ -139,12 +139,11 @@ public class GraphPanel extends JPanel
         // start drawing the points.
         g.setColor(Color.red);
         try {
-            GraphEntry ge;
-            for (ListIterator listiter = logdata.listIterator();
-                    ge = (GraphEntry) listiter.next();
-                    listiter.hasNext())
+            ListIterator listiter = logdata.listIterator();
+            while (listiter.hasNext())
             {
-
+                GraphEntry ge = (GraphEntry) listiter.next();
+// more here.
             }
         }
         catch (NoSuchElementException e) { }
@@ -252,7 +251,7 @@ public class GraphPanel extends JPanel
         }
 
         public void run() {
-            parser.read();
+            parser.run();
             loggerstate = logloaded;
             //repaint();
         }

@@ -3,19 +3,20 @@
 // Any other distribution or use of this source violates copyright.
 //
 
+import java.io.File;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
 // Main Frame
-public class RC5graph extends JFrame {
+public class RC5graph extends JFrame
+{
+    GraphPanel graphPanel;
 
-	GraphPanel graphpanel;
-
-	// Constructor
-	public RC5graph(String title) {
-		
-		// Parent Constructor
+    // Constructor
+    public RC5graph(String title)
+    {
+        // Parent Constructor
         super(title);
         
         // Create Menu
@@ -32,28 +33,28 @@ public class RC5graph extends JFrame {
         
         menuItem = new JMenuItem("Open log file...");
         menuItem.addActionListener(new ActionListener() {
-       	    public void actionPerformed(ActionEvent e) {
-		        // Create a file chooser
-				final JFileChooser fc = new JFileChooser();
-				// In response to a button click:
-				int returnVal = fc.showOpenDialog(RC5graph.this);
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					File file = fc.getSelectedFile();
-					graphpanel.currentLogFile = file;
-					graphpanel.readLogData();
-				}
-				
-			}
-		});
+            public void actionPerformed(ActionEvent e) {
+                // Create a file chooser
+                final JFileChooser fc = new JFileChooser();
+                // In response to a button click:
+                int returnVal = fc.showOpenDialog(RC5graph.this);
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    File file = fc.getSelectedFile();
+                    graphPanel.currentLogFile = file;
+                    graphPanel.readLogData();
+                }
+                
+            }
+        });
         menuItem.setMnemonic(KeyEvent.VK_O);
         menu.add(menuItem);
         
         menuItem = new JMenuItem("Exit");
         menuItem.addActionListener(new ActionListener() {
-       	    public void actionPerformed(ActionEvent e) {
-       	    	System.exit(0);
-			}
-		});
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
         menuItem.setMnemonic(KeyEvent.VK_X);
         menu.add(menuItem);
         
@@ -63,33 +64,33 @@ public class RC5graph extends JFrame {
         
         menuItem = new JMenuItem("About");
         menuItem.addActionListener(new ActionListener() {
-       	    public void actionPerformed(ActionEvent e) {
-       	    	// Display about dialog box.
-			}
-		});
+            public void actionPerformed(ActionEvent e) {
+                // Display about dialog box.
+            }
+        });
         menuItem.setMnemonic(KeyEvent.VK_A);
         menu.add(menuItem);
-	}
+    }
 
-    public Component createComponents() {
-    	
-    	// Create an internal panel to hold the graph
+    public Component createComponents()
+    {
+        // Create an internal panel to hold the graph
         graphPanel = new GraphPanel();
         Dimension myPreferredSize = new Dimension( 620, 320 );
-		graphPanel.setPreferredSize(myPreferredSize);	
-		graphPanel.setBackground(Color.lightGray);
+        graphPanel.setPreferredSize(myPreferredSize);    
+        graphPanel.setBackground(Color.lightGray);
 //        graphPanel.setLayout(new GridLayout(0, 1));
 
         return graphPanel;
     }
     
-	public static void main(String[] args) {
-		
-		// Set the style.
+    public static void main(String[] args)
+    {
+        // Set the style.
         try {
             UIManager.setLookAndFeel(
 //                UIManager.getCrossPlatformLookAndFeelClassName()
-				UIManager.getSystemLookAndFeelClassName());
+                UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) { }
 
         // Create the top-level container and add contents to it.
