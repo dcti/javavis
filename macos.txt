@@ -1,36 +1,30 @@
-From subotnik@gmx.de Thu Jan 13 12:23:06 2000
-Date: Thu, 13 Jan 2000 14:48:08 +0100
-From: Michael Nahrath <subotnik@gmx.de>
-Subject: Re: Java LogVis update
-
 
 background:
+
 The MRJ (Macintosh Runtime for Java) installed with MacOs by default is not
 capable of running Java-applications. It can only handle appletts.
 
 There is an application-runner ("JBindery") in the MRJ-SDK (MRJ-Software
 Developement Kit) wich is free downloadable from apples website
-<http://apple.com/java/> but hardly any user has installed it.
+<http://developer.apple.com/java/classic.html> but hardly any user has
+installed it.
 
-I ran the 1.1 with it.
-It's just dragging RC5graph.jar on the JBindery Icon and clicking 'Run'.
+But if MRJ-SDK is installed, running .jar files is rather easy:
 
-You can allso save te program as a MacOs-binary from JBindary, that will
-only require MRJ to be installed.
+It's just dragging 'JavaVis.jar' on the JBindery Icon and clicking 'Run'.
 
-That's what I did with the corrected RC5graph.jar Yves sent to me last week
-and with the 1.1 today (i had sent Yves some bug-reports on the 1.0).
-
-
-- this binary uses up to 35 MBytes of temorary memory.
-I don't know if this is a problem of JBindery, of your code or if I have
-done something wrong on compiling.
-- A real MacOs application should also include some MacOs-specific
-Information like a Creator-Code, Version-resource etc.
-I can not do that, because i have no programming-experience on MacOs at all.
+You can allso save the program as a MacOS-binary from JBindary ('save
+settings...'), that will only require MRJ to be installed.
 
 
-Greeting, Michi
--- 
-<http://nahrath.de/michael/>
+There is some code in the sourcefile 'JavaVis.java' that will will enable
+drag&drop and other features on MacOs. But this has to be uncommented first
+and then the whole application has to be compiled again.
 
+There are some more sophisticated enhancements like adding resources to
+controll the menus and some packing stuff for stand-allone applications.
+
+If you want to see how this may be done download, unpack and examine the
+standalone version provided at <http://michael.nahrath.de/dnet/JavaVis/>!
+
+There may be more and more current information on this website as well.
