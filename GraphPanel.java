@@ -5,13 +5,15 @@
 
 import java.io.*;
 import java.util.*;
+import java.text.*;
+import java.awt.*;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.FontMetrics;
-import javax.swing.JPanel;
+//import javax.swing.JPanel;
 
 
-public class GraphPanel extends JPanel
+public class GraphPanel extends Panel
 {
     // Empty borders
     protected final int topBorder       = 10;
@@ -24,7 +26,7 @@ public class GraphPanel extends JPanel
     protected Color grayShade = new Color(235, 235, 235);
 
     // storage variables.
-    protected List logdata = Collections.synchronizedList(new ArrayList());
+    protected Vector logdata = new Vector();
     protected long mintime, maxtime;
     protected double minrate, maxrate;
     protected double totalkeys;
@@ -40,6 +42,8 @@ public class GraphPanel extends JPanel
     // other
     public File currentLogFile;
 
+    private static String[] months = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+
 
     // constructor
     public GraphPanel()
@@ -47,36 +51,38 @@ public class GraphPanel extends JPanel
         // set the default ranges
         rangestart = -1;
         rangeend = -1;
-    
+
         // set the flags
         loggerstate = nologloaded;
+
+        setBackground(Color.lightGray);
     }
 
 
     // public interface methods.
     void getDataRange(long start, long end)
         { start = mintime; end = maxtime; }
-    
+
     // public interface methods.
     void getRange(long start, long end)
         { start = rangestart; end = rangeend; }
-    
+
     // public interface methods.
     void setRange(long start, long end)
         { rangestart = start; rangeend = end; }
-    
+
     // public interface methods.
     boolean isDataAvailable()
         { return (loggerstate == logloaded) &&
             (!logdata.isEmpty()) &&
               (minrate < maxrate) && (mintime < maxtime); }
-  
-  
-    public void paintComponent(Graphics g)
+
+
+    public void paint(Graphics g)
     {
         // Paint the window background.
-        super.paintComponent(g);
-        
+        super.paint(g);
+
         if (loggerstate == loadinprogress) {
             g.drawString("Please wait, currently reloading log file.",
                 leftBorder, topBorder);
@@ -100,28 +106,30 @@ public class GraphPanel extends JPanel
                 leftBorder, topBorder);
             return;
         }
-        
-        
-        // Determine dimensions of graph area.
-        width = this.getWidth() - (leftBorder + rightBorder);
-        height = this.getHeight() - (topBorder + bottomBorder);
 
-        
+
+        // Determine dimensions of graph area.
+        Dimension d = this.getSize();
+        width = d.width - (leftBorder + rightBorder);
+        height = d.height - (topBorder + bottomBorder);
+
+		if ( (width < 0) || (height < 0)) return;
+
         // determine the range window that we will draw
         long timelo = (rangestart == -1 ? mintime : rangestart);
         long timehi = (rangeend == -1 ? maxtime : rangeend);
         if (timehi <= timelo) return;
-        
+
         FontMetrics fm = g.getFontMetrics();
-        
+
         // set up the graphing window structure and scaling
         double yinterval = (maxrate - minrate) / height * (fm.getHeight() * 4);
         long xinterval = (timehi - timelo) / width * (fm.charWidth('A') * 10);
-        
+
         // Start with a white graph area.
         g.setColor(Color.white);
         g.fillRect(leftBorder, topBorder, width, height);
-        
+
         // Add gray shading to graph area.
         g.setColor(grayShade);
         for(int i=0 ; i<width ; i+=100) {
@@ -131,14 +139,54 @@ public class GraphPanel extends JPanel
                 g.fillRect((leftBorder+i), topBorder, 50, height);
             }
         }
-        
-        // draw horizontal lines
+
+		// get the default height ...
+		int string_height = fm.getHeight();
         g.setColor(Color.black);
+
+		/* Draw the x-Axis */
+		for (int i = 0; i < width; i+= 50)
+		{
+				Date dt = new Date(100*(timelo+i*(timehi-timelo)/width));
+				String str = months[dt.getMonth()] +" "+dt.getDate();
+				int length = fm.stringWidth(str) / 2;
+                g.drawString(str,(leftBorder+i)-length,topBorder+height+5+string_height);
+                str = dt.getHours()+":"+dt.getMinutes();
+				length = fm.stringWidth(str) / 2;
+                g.drawString(str,(leftBorder+i)-length,topBorder+height+5+2*string_height);
+                g.drawLine((leftBorder+i),topBorder+height,(leftBorder+i),topBorder+height+5);
+        }
+
+
+
+		NumberFormat nf = NumberFormat.getInstance();
+		nf.setMinimumFractionDigits(2);
+		nf.setMaximumFractionDigits(2);
+
+		string_height /= 2;
+
+        // draw horizontal lines & y-Axis
         for (double r = minrate + yinterval; r < maxrate; r += yinterval) {
             int y = topBorder + (int) ((float) height *
                 (float) (r - minrate) / (float) (maxrate - minrate));
-            g.drawLine(leftBorder, y, leftBorder + width, y);
+            for (int i = 0; i < width-3; i += 6)
+            {
+              g.drawLine(leftBorder+i, y, leftBorder + i+3, y);
+            }
+
+            double temp = (maxrate -r) / 1000;
+            String number = nf.format(temp);
+            int length = fm.stringWidth(number);
+            g.drawString(number,leftBorder - 5 - length,y+string_height);
+            g.drawLine(leftBorder-5,y,leftBorder,y);
         }
+
+		/* draw the highest Rate */
+        double temp = (maxrate) / 1000;
+        String number = nf.format(temp);
+        int length = fm.stringWidth(number);
+        g.drawString(number,leftBorder - 5 - length,topBorder+string_height);
+
 
 /*
   HPEN graphline = CreatePen(PS_SOLID, 2, RGB(0x99, 0x33, 0x33));
@@ -146,8 +194,8 @@ public class GraphPanel extends JPanel
   logdata.ForEach(IterDrawFuncRate, (void*)&paintstr);
   SelectObject(dc, oldpen);
   DeleteObject(graphline);
-  
-        
+
+
   // change to a small black pen for drawing the tick marks.
   HGDIOBJ oldbrush = SelectObject(dc, GetSysColorBrush(COLOR_WINDOWTEXT));
   SetBkMode(dc, TRANSPARENT);
@@ -220,7 +268,7 @@ public class GraphPanel extends JPanel
     (graphrect.bottom - graphrect.top - ylabelsize.cx) / 2, ylabel, strlen(ylabel));
   SelectObject(dc, oldfont);
   DeleteObject(rotatedfont);
-        
+
 */
 
         // start drawing the points.
@@ -230,11 +278,11 @@ public class GraphPanel extends JPanel
             boolean firstpoint = true;
             long lasttime = 0;
             int lastx = 0, lasty = 0;
-            
-            ListIterator listiter = logdata.listIterator();
-            while (listiter.hasNext())
+
+            Enumeration listiter = logdata.elements();
+            while (listiter.hasMoreElements())
             {
-                GraphEntry ge = (GraphEntry) listiter.next();
+                GraphEntry ge = (GraphEntry) listiter.nextElement();
 
                 // convert to screen coords.
                 int tmpx = leftBorder + (int) ((float) width *
@@ -245,7 +293,11 @@ public class GraphPanel extends JPanel
                 // plot the point.
                 if (!firstpoint)
                 {
-                    if ((ge.timestamp - lasttime) > 300 + 1.25 * ge.duration)
+
+/*                    System.out.println("ts :"+ ge.timestamp);
+                    System.out.println("lt :"+ lasttime);
+                    System.out.println("dr :"+ ge.duration); */
+                    if ((ge.timestamp - lasttime) > (300 + 1.25 * ge.duration*10))
                     {
                         // There was a significant lapse in time since the last point,
                         // which probably indicates that the client was turned off for
@@ -275,13 +327,13 @@ public class GraphPanel extends JPanel
         // Done!
         return;
     }
-    
+
 
     // Load log in a separate thread.
     final class WorkerThread extends Thread
     {
         LogParser parser = null;
-        
+
         WorkerThread(BufferedReader inbuffer) {
             parser = new LogParser(inbuffer, logdata);
             loggerstate = loadinprogress;
@@ -297,10 +349,10 @@ System.out.println("load in progress");
             totalkeys = 0.0;
 
             try {
-                ListIterator listiter = logdata.listIterator();
-                while (listiter.hasNext())
+                Enumeration listiter = logdata.elements();
+                while (listiter.hasMoreElements())
                 {
-                    GraphEntry ge = (GraphEntry) listiter.next();
+                    GraphEntry ge = (GraphEntry) listiter.nextElement();
                     if (mintime == 0 || ge.timestamp < mintime) mintime = ge.timestamp;
                     if (maxtime == 0 || ge.timestamp > maxtime) maxtime = ge.timestamp;
                     if (minrate == 0.0 || ge.rate < minrate) minrate = ge.rate;
@@ -321,11 +373,11 @@ System.out.println("load complete.  numrecords=" + logdata.size());
     void readLogData()
     {
         // reset storage.
-        logdata.clear();
+        logdata.removeAllElements();
         mintime = maxtime = 0;
         minrate = maxrate = 0.0;
         totalkeys = 0.0;
-        
+
         // open up the log.
         BufferedReader in;
         try {
@@ -336,7 +388,7 @@ System.out.println("load complete.  numrecords=" + logdata.size());
             loggerstate = lognotfound;
             return;
         }
-        
+
         WorkerThread p = new WorkerThread(in);
         p.start();
         repaint();

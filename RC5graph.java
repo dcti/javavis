@@ -6,10 +6,10 @@
 import java.io.File;
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.*;
+//import javax.swing.*;
 
 // Main Frame
-public class RC5graph extends JFrame
+public class RC5graph extends Frame
 {
     GraphPanel graphPanel;
 
@@ -18,20 +18,20 @@ public class RC5graph extends JFrame
     {
         // Parent Constructor
         super(title);
-        
+
         // Create Menu
-        JMenuBar menuBar;
-        JMenu menu;
-        JMenuItem menuItem;
-        
-        menuBar = new JMenuBar();
-        this.setJMenuBar(menuBar);
-        
-        menu = new JMenu("File");
-        menu.setMnemonic(KeyEvent.VK_F);
+        MenuBar menuBar;
+        Menu menu;
+        MenuItem menuItem;
+
+        menuBar = new MenuBar();
+        this.setMenuBar(menuBar);
+
+        menu = new Menu("File");
+        menu.setShortcut(new MenuShortcut(KeyEvent.VK_F));
         menuBar.add(menu);
-        
-        menuItem = new JMenuItem("Open log file...");
+
+        menuItem = new MenuItem("Open log file...");
 	final FileDialog fileDialog = new FileDialog(this);
         menuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -49,61 +49,71 @@ public class RC5graph extends JFrame
         	            graphPanel.readLogData();
 			}
                 }
-                
+
             }
         });
-        menuItem.setMnemonic(KeyEvent.VK_O);
+//        menuItem.setMnemonic(KeyEvent.VK_O);
         menu.add(menuItem);
-        
-        menuItem = new JMenuItem("Exit");
+
+        menuItem = new MenuItem("Exit");
         menuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
             }
         });
-        menuItem.setMnemonic(KeyEvent.VK_X);
+        menuItem.setShortcut(new MenuShortcut(KeyEvent.VK_X));
         menu.add(menuItem);
-        
-        menu = new JMenu("Help");
-        menu.setMnemonic(KeyEvent.VK_H);
+
+        menu = new Menu("Help");
+        menu.setShortcut(new MenuShortcut(KeyEvent.VK_H));
         menuBar.add(menu);
-        
-        menuItem = new JMenuItem("About");
+
+        menuItem = new MenuItem("About");
         menuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 // Display about dialog box.
             }
         });
-        menuItem.setMnemonic(KeyEvent.VK_A);
+        menuItem.setShortcut(new MenuShortcut(KeyEvent.VK_A));
         menu.add(menuItem);
     }
 
     public Component createComponents()
     {
         // Create an internal panel to hold the graph
-        graphPanel = new GraphPanel();
-        Dimension myPreferredSize = new Dimension( 620, 320 );
-        graphPanel.setPreferredSize(myPreferredSize);    
-        graphPanel.setBackground(Color.lightGray);
+        graphPanel = new GraphPanel()
+        {
+        	public Dimension getPreferredSize()
+        	{
+        		return new Dimension(620,320);
+        	}
+        };
+/*        Dimension myPreferredSize = new Dimension( 620, 320 );
+        graphPanel.setPreferredSize(myPreferredSize);
+        graphPanel.setBackground(Color.lightGray);*/
 //        graphPanel.setLayout(new GridLayout(0, 1));
 
         return graphPanel;
     }
-    
+
     public static void main(String[] args)
     {
         // Set the style.
-        try {
+/*        try {
             UIManager.setLookAndFeel(
 //                UIManager.getCrossPlatformLookAndFeelClassName()
                 UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) { }
+        } catch (Exception e) { }*/
 
         // Create the top-level container and add contents to it.
         RC5graph app = new RC5graph("distributed.net Logfile Visualizer");
         Component contents = app.createComponents();
-        app.getContentPane().add(contents, BorderLayout.CENTER);
-        
+//        app.getContentPane().add(contents, BorderLayout.CENTER);
+		app.setBackground(Color.lightGray);
+        app.add(contents, BorderLayout.CENTER);
+        app.add("West",new leftPanel());
+        app.add("South",new Label("Work Unit completion date",Label.CENTER));
+
         // Finish setting up the frame, and show it.
         app.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {

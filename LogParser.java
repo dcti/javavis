@@ -6,14 +6,14 @@
 import java.lang.*;
 import java.text.*;
 import java.io.*;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+//import java.util.List;
 
 
 public class LogParser
 {
     private BufferedReader logfile;
-    private List logdata;
+    private Vector logdata;
 
 
 //   [Dec 16 03:25:59 UTC] Completed CSC packet 00205AE7:80000000 (4*2^28 keys)
@@ -26,7 +26,7 @@ public class LogParser
 //   [Jul 18 03:00:57 GMT] 0.01:59:18.82 - [299,977.15 keys/sec]
 
 
-    public LogParser(BufferedReader br, List list)
+    public LogParser(BufferedReader br, Vector list)
     {
         logfile = br;
         logdata = list;
@@ -44,7 +44,7 @@ public class LogParser
                 s2 = logfile.readLine();
 
                 if (ParseLogEntry(s1, s2, ge)) {
-                    logdata.add(ge);
+                    logdata.addElement(ge);
                     ge = new GraphEntry();
                 }
 
