@@ -3,14 +3,17 @@
 // Any other distribution or use of this source violates copyright.
 //
 
+
+
+
 import java.io.File;
 import java.awt.*;
 import java.awt.event.*;
-import com.apple.mrj.*;                 // MacOS MRJ
+//import com.apple.mrj.*;                 // MacOS MRJ
 
 // Main Frame
 class RC5graph extends Frame
-implements MRJAboutHandler, MRJOpenDocumentHandler, MRJQuitHandler      // MacOS MRJ
+//implements MRJAboutHandler, MRJOpenDocumentHandler, MRJQuitHandler      // MacOS MRJ
 {
     GraphPanel graphPanel;
     final AboutDialog aboutDialog = new AboutDialog(this);
@@ -148,9 +151,9 @@ implements MRJAboutHandler, MRJOpenDocumentHandler, MRJQuitHandler      // MacOS
         });
         app.pack();
         app.setVisible(true);
-        MRJApplicationUtils.registerAboutHandler(app);  // MacOS MRJ
-        MRJApplicationUtils.registerQuitHandler(app);           // MacOS MRJ
-        MRJApplicationUtils.registerOpenDocumentHandler(app);           // MacOS MRJ
+        //MRJApplicationUtils.registerAboutHandler(app);  // MacOS MRJ
+        //MRJApplicationUtils.registerQuitHandler(app);           // MacOS MRJ
+        //MRJApplicationUtils.registerOpenDocumentHandler(app);           // MacOS MRJ
         if (args.length >= 1) {
             app.handleOpenFile(new File(args[0]));
         }
