@@ -6,8 +6,9 @@ import java.io.File;
 import java.awt.*;
 import java.awt.event.*;
 
-import com.apple.mrj.*; // MRJToolkitStubs.zip provides empty declarations to link against
+//import com.apple.mrj.*; // MRJToolkitStubs.zip provides empty declarations to link against
 
+/* 
 class MacOSMRJToolkitFrame extends JavaVis implements MRJAboutHandler, MRJOpenDocumentHandler, MRJQuitHandler
 {
     public MacOSMRJToolkitFrame(String title)
@@ -21,6 +22,7 @@ class MacOSMRJToolkitFrame extends JavaVis implements MRJAboutHandler, MRJOpenDo
         MRJApplicationUtils.registerOpenDocumentHandler(this);   
     }
 }
+*/
 
 // Main Frame
 public class JavaVis extends Frame
@@ -109,9 +111,9 @@ public class JavaVis extends Frame
         menuItem.setShortcut(new MenuShortcut(KeyEvent.VK_Q));
         menu.add(menuItem);
 
-        if (MRJApplicationUtils.isMRJToolkitAvailable() && System.getProperty("os.name").equals("Mac OS")) {
+//        if (MRJApplicationUtils.isMRJToolkitAvailable() && System.getProperty("os.name").equals("Mac OS")) {
             // Under "Mac OS" (!="Mac OS X") the "About box" is provided by the MRJApplicationUtils
-        } else {
+//        } else {
             menu = new Menu("Help");
 
             menuItem = new MenuItem("About JavaVis...");
@@ -130,7 +132,7 @@ public class JavaVis extends Frame
                 // fall back on old strategy
                 menuBar.add(menu);
             }
-        }
+//        }
         
         Component contents = createComponents();
         //getContentPane().add(contents, BorderLayout.CENTER);
@@ -172,14 +174,14 @@ public class JavaVis extends Frame
     {
         arguments = args;
         
-        if (MRJApplicationUtils.isMRJToolkitAvailable()) {
-            // Create the top-level container and add contents to it.
-            final MacOSMRJToolkitFrame app = new MacOSMRJToolkitFrame("distributed.net Logfile Visualizer");
-		  }
-		  else {
+//        if (MRJApplicationUtils.isMRJToolkitAvailable()) {
+//            // Create the top-level container and add contents to it.
+//            final MacOSMRJToolkitFrame app = new MacOSMRJToolkitFrame("distributed.net Logfile Visualizer");
+//		  }
+//		  else {
             // Create the top-level container and add contents to it.
             final JavaVis app = new JavaVis("distributed.net Logfile Visualizer");
-        }
+//        }
     }
 
     public void handleOpenFile(File file) {
