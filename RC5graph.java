@@ -94,7 +94,7 @@ public class RC5graph extends JFrame
         } catch (Exception e) { }
 
         // Create the top-level container and add contents to it.
-        RC5graph app = new RC5graph("RC5 logfile visualizer");
+        RC5graph app = new RC5graph("distributed.net Logfile Visualizer");
         Component contents = app.createComponents();
         app.getContentPane().add(contents, BorderLayout.CENTER);
         
