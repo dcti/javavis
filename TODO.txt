@@ -11,8 +11,5 @@ color for each.
 - add a "Status bar" and display the progress/notification messages
 there, instead of painting them within the graph window.
 
-- add a persisted Most-Recently-Used list of log filenames that have
-been loaded by the log visualizer.
-
 
 

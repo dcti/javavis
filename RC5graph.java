@@ -6,14 +6,15 @@
 import java.io.File;
 import java.awt.*;
 import java.awt.event.*;
-import com.apple.mrj.*;
+//import com.apple.mrj.*;
 
 // Main Frame
-public class RC5graph extends Frame 
-                      implements MRJAboutHandler, MRJOpenDocumentHandler, MRJQuitHandler
+public class RC5graph extends Frame
+                      //implements MRJAboutHandler, MRJOpenDocumentHandler, MRJQuitHandler
 {
     GraphPanel graphPanel;
     final AboutDialog aboutDialog = new AboutDialog(this);
+    final LogFileHistory lfh;
     MenuItem refreshItem;
 
     // Constructor
@@ -21,6 +22,11 @@ public class RC5graph extends Frame
     {
         // Parent Constructor
         super(title);
+
+        lfh = LogFileHistory.open();
+        for(int i = 0; i < lfh.getFiles().length; i++){
+			System.out.println(lfh.getFiles()[i]);
+		}
 
         // Create Menu
         MenuBar menuBar;
@@ -46,6 +52,7 @@ public class RC5graph extends Frame
                 String filename = fileDialog.getFile();
                 if (filename != null) {
                     File file = new File(fileDialog.getDirectory(), filename);
+                    lfh.addFile(file);
                     handleOpenFile(file);
                 }
 
@@ -53,7 +60,7 @@ public class RC5graph extends Frame
         });
         menuItem.setShortcut(new MenuShortcut(KeyEvent.VK_O));
         menu.add(menuItem);
-        
+
         refreshItem = new MenuItem("Refresh");
         refreshItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -64,6 +71,20 @@ public class RC5graph extends Frame
         refreshItem.setEnabled(false);
         menu.add(refreshItem);
         menu.addSeparator();
+
+		//add history files (if any)
+		File[] files = lfh.getFiles();
+		for(int i = 0; i< files.length; i++){
+			if(files[i] != null){
+				menuItem = new MenuItem(files[i].toString());
+				menu.add(menuItem);
+				menuItem.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e){
+						handleOpenFile(new File(((MenuItem)e.getSource()).getLabel()));
+					}
+				});
+			}
+		}
 
         menuItem = new MenuItem("Quit");
         menuItem.addActionListener(new ActionListener() {
@@ -127,14 +148,14 @@ public class RC5graph extends Frame
         });
         app.pack();
         app.setVisible(true);
-        MRJApplicationUtils.registerAboutHandler(app);
-        MRJApplicationUtils.registerQuitHandler(app);
-        MRJApplicationUtils.registerOpenDocumentHandler(app);
+        //MRJApplicationUtils.registerAboutHandler(app);
+        //MRJApplicationUtils.registerQuitHandler(app);
+        //MRJApplicationUtils.registerOpenDocumentHandler(app);
         if (args.length >= 1) {
             app.handleOpenFile(new File(args[0]));
         }
     }
-    
+
     public void handleOpenFile(File file) {
         if (file.exists()) {
             graphPanel.currentLogFile = file;
@@ -142,12 +163,13 @@ public class RC5graph extends Frame
             refreshItem.setEnabled(true);
         }
     }
-    
+
     public void handleAbout() {
         aboutDialog.show();
     }
-    
+
     public void handleQuit() {
+		lfh.save();
         System.exit(0);
     }
 }
