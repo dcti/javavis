@@ -4,9 +4,11 @@
 //
 
 import java.io.*;
-import java.util.*;         // java.util.AbstractList
-import java.awt.*;
-import javax.swing.*;
+import java.util.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.FontMetrics;
+import javax.swing.JPanel;
 
 
 public class GraphPanel extends JPanel
@@ -22,7 +24,7 @@ public class GraphPanel extends JPanel
     protected Color grayShade = new Color(235, 235, 235);
 
     // storage variables.
-    protected java.util.List logdata = Collections.synchronizedList(new ArrayList());
+    protected List logdata = Collections.synchronizedList(new ArrayList());
     protected long mintime, maxtime;
     protected double minrate, maxrate;
     protected double totalkeys;
@@ -72,6 +74,9 @@ public class GraphPanel extends JPanel
   
     public void paintComponent(Graphics g)
     {
+        // Paint the window background.
+        super.paintComponent(g);
+        
         if (loggerstate == loadinprogress) {
             g.drawString("Please wait, currently reloading log file.",
                 leftBorder, topBorder);
@@ -112,9 +117,6 @@ public class GraphPanel extends JPanel
         // set up the graphing window structure and scaling
         double yinterval = (maxrate - minrate) / height * (fm.getHeight() * 4);
         long xinterval = (timehi - timelo) / width * (fm.charWidth('A') * 10);
-        
-        // Paint the window background.
-        super.paintComponent(g);
         
         // Start with a white graph area.
         g.setColor(Color.white);
@@ -239,21 +241,43 @@ public class GraphPanel extends JPanel
         return;
     }
     
- 
+
     // Load log in a separate thread.
     final class WorkerThread extends Thread
     {
         LogParser parser = null;
         
-        WorkerThread(BufferedReader in, java.util.List logdata) {
-            parser = new LogParser(in, logdata);
+        WorkerThread(BufferedReader inbuffer) {
+            parser = new LogParser(inbuffer, logdata);
             loggerstate = loadinprogress;
         }
 
-        public void run() {
+        public void run()
+        {
+System.out.println("load in progress");
             parser.run();
+
+            mintime = maxtime = 0;
+            minrate = maxrate = 0.0;
+            totalkeys = 0.0;
+
+            try {
+                ListIterator listiter = logdata.listIterator();
+                while (listiter.hasNext())
+                {
+                    GraphEntry ge = (GraphEntry) listiter.next();
+                    if (mintime == 0 || ge.timestamp < mintime) mintime = ge.timestamp;
+                    if (maxtime == 0 || ge.timestamp > maxtime) maxtime = ge.timestamp;
+                    if (minrate == 0.0 || ge.rate < minrate) minrate = ge.rate;
+                    if (maxrate == 0.0 || ge.rate > maxrate) maxrate = ge.rate;
+                    totalkeys += (float) ge.keycount;
+                }
+            }
+            catch (NoSuchElementException e) { }
+            
             loggerstate = logloaded;
-            //repaint();
+            repaint();
+System.out.println("load complete.  numrecords=" + logdata.size());
         }
     }
 
@@ -278,11 +302,9 @@ public class GraphPanel extends JPanel
             return;
         }
         
-        WorkerThread p = new WorkerThread(in, logdata);
+        WorkerThread p = new WorkerThread(in);
         p.start();
-        
         repaint();
-        
     }
 
 
