@@ -68,9 +68,10 @@ public class RC5graph extends Frame
         menuBar.add(menu);
 
         menuItem = new MenuItem("About");
+        final AboutDialog aboutDialog = new AboutDialog(this);
         menuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // Display about dialog box.
+                aboutDialog.show();
             }
         });
         menuItem.setShortcut(new MenuShortcut(KeyEvent.VK_A));
