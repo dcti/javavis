@@ -1,4 +1,4 @@
-// Copyright distributed.net 1997-2001 - All Rights Reserved
+// Copyright distributed.net 1997-2002 - All Rights Reserved
 // For use in distributed.net projects only.
 // Any other distribution or use of this source violates copyright.
 //
@@ -32,6 +32,9 @@ class LogParser
 //  ---
 //   [Nov 09 03:38:02 UTC] RC5: Completed (1.00 stats units)
 //                         0.00:02:43.43 - [176,486 keys/s]
+//  ---
+//   [Dec 24 02:43:22 UTC] RC5-72: Completed CA:40749399:00000000 (1.00 stats units)
+//                         0.02:49:40.68 - [354,351 keys/s]
 
 
 
@@ -227,6 +230,7 @@ class LogParser
         else if (project.compareTo("DES") == 0) projectcode = 2;
         else if (project.compareTo("CSC") == 0) projectcode = 3;
         else if (project.compareTo("OGR") == 0) projectcode = 4;
+        else if (project.compareTo("72:") == 0) projectcode = 8;
 
         return (int) projectcode;
     }

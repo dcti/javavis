@@ -1,4 +1,4 @@
-// Copyright distributed.net 1997-2001 - All Rights Reserved
+// Copyright distributed.net 1997-2002- All Rights Reserved
 // For use in distributed.net projects only.
 // Any other distribution or use of this source violates copyright.
 
@@ -15,7 +15,7 @@ class MacOSMRJToolkitFrame extends JavaVis implements MRJAboutHandler, MRJOpenDo
         // Parent Constructor
         super(title);
         
-        // Register ourselves with MacOS Runtime for Java (MRJ) system event handlers
+       // Register ourselves with MacOS Runtime for Java (MRJ) system event handlers
         MRJApplicationUtils.registerAboutHandler(this);
         MRJApplicationUtils.registerQuitHandler(this);
         MRJApplicationUtils.registerOpenDocumentHandler(this);   

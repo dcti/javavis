@@ -1,4 +1,4 @@
-// Copyright distributed.net 1997-2001 - All Rights Reserved
+// Copyright distributed.net 1997-2002 - All Rights Reserved
 // For use in distributed.net projects only.
 // Any other distribution or use of this source violates copyright.
 //
@@ -342,10 +342,11 @@ implements MouseMotionListener, MouseListener,ActionListener
                 GraphEntry ge = (GraphEntry) listiter.nextElement();
                 if (firstpoint)
                 {
-                    if (ge.project == 1) g.setColor(Color.red);      // RC5
+                    if (ge.project == 1) g.setColor(Color.red);      // RC5-64
                     else if (ge.project == 2) g.setColor(Color.yellow);   // DES
                     else if (ge.project == 3) g.setColor(Color.green);    // CSC
                     else if (ge.project == 4) g.setColor(Color.blue);     // OGR
+                    else if (ge.project == 8) g.setColor(Color.magenta);  // RC5-72
                 }
 
                 // convert to screen coords.
@@ -366,10 +367,11 @@ implements MouseMotionListener, MouseListener,ActionListener
                         // awhile, so draw a "drop" in the keyrate graph.
                         g.drawLine(lastx, lasty, lastx, topBorder + height);
                         g.drawLine(lastx, topBorder + height, tmpx, topBorder + height);
-                        if (ge.project == 1) g.setColor(Color.red);      // RC5
+                        if (ge.project == 1) g.setColor(Color.red);      // RC5-64
                         else if (ge.project == 2) g.setColor(Color.yellow);   // DES
                         else if (ge.project == 3) g.setColor(Color.green);    // CSC
                         else if (ge.project == 4) g.setColor(Color.blue);     // OGR
+                        else if (ge.project == 8) g.setColor(Color.magenta);  // RC5-72
                         else g.setColor(Color.black);    // Unknown
                         g.drawLine(tmpx, topBorder + height, tmpx, tmpy);
                     }
@@ -385,10 +387,11 @@ implements MouseMotionListener, MouseListener,ActionListener
                         {
                             // the project was swicted
                             g.drawLine(lastx, lasty, lastx, topBorder + height);
-                            if (ge.project == 1) g.setColor(Color.red);      // RC5
+                            if (ge.project == 1) g.setColor(Color.red);      // RC5-64
                             else if (ge.project == 2) g.setColor(Color.yellow);   // DES
                             else if (ge.project == 3) g.setColor(Color.green);    // CSC
                             else if (ge.project == 4) g.setColor(Color.blue);     // OGR
+                            else if (ge.project == 8) g.setColor(Color.magenta);  // RC5-72
                             else g.setColor(Color.black);    // Unknown
                             g.drawLine(lastx, topBorder + height, tmpx, tmpy);
                         }
@@ -408,10 +411,10 @@ implements MouseMotionListener, MouseListener,ActionListener
         //legenda
         string_height = fm.getHeight();
         string_height /= 2;
-        g.setColor(Color.red);     // RC5
+        g.setColor(Color.red);     // RC5-64
         g.drawLine(leftBorder + 5, topBorder + 3 + (string_height / 2), leftBorder + 18, topBorder + 3 + (string_height / 2));
         g.setColor(Color.black);
-        g.drawString("RC5",leftBorder + 20, topBorder + 3 + string_height);
+        g.drawString("RC5-64",leftBorder + 20, topBorder + 3 + string_height);
         g.setColor(Color.yellow);     // DES
         g.drawLine(leftBorder + 5, topBorder + 6 + string_height + (string_height / 2), leftBorder + 18, topBorder + 6 + string_height + (string_height / 2));
         g.setColor(Color.black);
@@ -424,11 +427,15 @@ implements MouseMotionListener, MouseListener,ActionListener
         g.drawLine(leftBorder + 5, topBorder + 12 + (string_height * 3) + (string_height / 2), leftBorder + 18, topBorder + 12 + (string_height * 3) + (string_height / 2));
         g.setColor(Color.black);
         g.drawString("OGR",leftBorder + 20, topBorder + 12 + (string_height * 4));
-        g.setColor(Color.black);     // Unknown
-        g.drawLine(leftBorder + 5, topBorder + 15 + (string_height * 4) + (string_height / 2), leftBorder + 18, topBorder + 15 + (string_height * 4) + (string_height / 2));
+        g.setColor(Color.magenta);     // RC5-72
+        g.drawLine(leftBorder + 5, topBorder + 15 + (string_height * 4) + (string_height / 2), leftBorder + 18, topBorder + 15 + (string_height * 4) + (string_height /  +2));
         g.setColor(Color.black);
-        g.drawString("Unknown", leftBorder + 20, topBorder + 15 + (string_height * 5));
-
+        g.drawString("RC5-72", leftBorder + 20, topBorder + 15 + (string_height * 5));
+        g.setColor(Color.black);     // Unknown
+        g.drawLine(leftBorder + 75, topBorder + 3 + (string_height / 2), leftBorder + 88, topBorder + 3 + (string_height / 2));
+        g.setColor(Color.black);
+        g.drawString("Unknown", leftBorder + 90, topBorder + 3 + string_height);
+                                                        
         g.setClip(null);
         g.setColor(Color.red);
 
