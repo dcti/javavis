@@ -29,7 +29,7 @@ class AboutDialog extends Dialog
     AboutDialog(Frame parent)
     {
         super(parent, "About this program", true);
-        setSize(360,260);
+        setSize(380,300);
         setLocation(50,50);
         setResizable(false);
         LayoutManager layout = new GridBagLayout();
@@ -38,14 +38,15 @@ class AboutDialog extends Dialog
         gbc.insets.left = 60;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
-        add(new Label("distributed.net Log Visualizer v1.3"), gbc);
+        add(new Label("distributed.net Log Visualizer v1.4"), gbc);
         add(new Label("programmed by:"), gbc);
-        add(new Label("Jeff \"Bovine\" Lawson <jlawson@bovine.net>"), gbc);
-        add(new Label("William Goo <wgoo@hmc.edu>"), gbc);
-        add(new Label("Yves Hetzer <aetsch@gmx.de>"), gbc);
-        add(new Label("Greg Hewgill <greg@hewgill.com>"), gbc);
-        add(new Label("Jason Townsend <townsend@cs.stanford.edu>"), gbc);
-        add(new Label("Andy Hedges <andy@hedges.net>"), gbc);
+        add(new Label("  Jeff \"Bovine\" Lawson <jlawson@bovine.net>"), gbc);
+        add(new Label("  William Goo <wgoo@hmc.edu>"), gbc);
+        add(new Label("  Yves Hetzer <aetsch@gmx.de>"), gbc);
+        add(new Label("  Greg Hewgill <greg@hewgill.com>"), gbc);
+        add(new Label("  Jason Townsend <townsend@cs.stanford.edu>"), gbc);
+        add(new Label("  Andy Hedges <andy@hedges.net>"), gbc);
+        add(new Label("  Stanley Appel <s.appel@bigfoot.com>"), gbc);
         add(new Label(), gbc);
         gbc.insets.left = 0;
         gbc.fill = GridBagConstraints.NONE;

@@ -6,11 +6,11 @@
 import java.io.File;
 import java.awt.*;
 import java.awt.event.*;
-//import com.apple.mrj.*;
+import com.apple.mrj.*;                 // MacOS MRJ
 
 // Main Frame
-public class RC5graph extends Frame
-                      //implements MRJAboutHandler, MRJOpenDocumentHandler, MRJQuitHandler
+class RC5graph extends Frame
+implements MRJAboutHandler, MRJOpenDocumentHandler, MRJQuitHandler      // MacOS MRJ
 {
     GraphPanel graphPanel;
     final AboutDialog aboutDialog = new AboutDialog(this);
@@ -24,9 +24,9 @@ public class RC5graph extends Frame
         super(title);
 
         lfh = LogFileHistory.open();
-        for(int i = 0; i < lfh.getFiles().length; i++){
-			System.out.println(lfh.getFiles()[i]);
-		}
+        //for (int i = 0; i < lfh.getFiles().length; i++) {
+        //  System.out.println(lfh.getFiles()[i]);
+        //}
 
         // Create Menu
         MenuBar menuBar;
@@ -72,19 +72,19 @@ public class RC5graph extends Frame
         menu.add(refreshItem);
         menu.addSeparator();
 
-		//add history files (if any)
-		File[] files = lfh.getFiles();
-		for(int i = 0; i< files.length; i++){
-			if(files[i] != null){
-				menuItem = new MenuItem(files[i].toString());
-				menu.add(menuItem);
-				menuItem.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e){
-						handleOpenFile(new File(((MenuItem)e.getSource()).getLabel()));
-					}
-				});
-			}
-		}
+        //add history files (if any)
+        File[] files = lfh.getFiles();
+        for(int i = 0; i< files.length; i++){
+            if(files[i] != null){
+                menuItem = new MenuItem(files[i].toString());
+                menu.add(menuItem);
+                menuItem.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e){
+                            handleOpenFile(new File(((MenuItem)e.getSource()).getLabel()));
+                    }
+                });
+            }
+        }
 
         menuItem = new MenuItem("Quit");
         menuItem.addActionListener(new ActionListener() {
@@ -134,7 +134,7 @@ public class RC5graph extends Frame
         // Create the top-level container and add contents to it.
         final RC5graph app = new RC5graph("distributed.net Logfile Visualizer");
         Component contents = app.createComponents();
-//        app.getContentPane().add(contents, BorderLayout.CENTER);
+        //app.getContentPane().add(contents, BorderLayout.CENTER);
         app.setBackground(Color.lightGray);
         app.add(contents, BorderLayout.CENTER);
         app.add("West",new leftPanel());
@@ -148,9 +148,9 @@ public class RC5graph extends Frame
         });
         app.pack();
         app.setVisible(true);
-        //MRJApplicationUtils.registerAboutHandler(app);
-        //MRJApplicationUtils.registerQuitHandler(app);
-        //MRJApplicationUtils.registerOpenDocumentHandler(app);
+        MRJApplicationUtils.registerAboutHandler(app);  // MacOS MRJ
+        MRJApplicationUtils.registerQuitHandler(app);           // MacOS MRJ
+        MRJApplicationUtils.registerOpenDocumentHandler(app);           // MacOS MRJ
         if (args.length >= 1) {
             app.handleOpenFile(new File(args[0]));
         }
@@ -169,7 +169,7 @@ public class RC5graph extends Frame
     }
 
     public void handleQuit() {
-		lfh.save();
+        lfh.save();
         System.exit(0);
     }
 }

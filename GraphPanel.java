@@ -286,7 +286,7 @@ implements MouseMotionListener, MouseListener,ActionListener
             str = dt.getHours()+":";
             if (dt.getMinutes() < 10)
             {
-                str += "0"+dt.getMinutes();
+                str += "0" + dt.getMinutes();
             } else {
                 str += dt.getMinutes();
             };
@@ -328,17 +328,25 @@ implements MouseMotionListener, MouseListener,ActionListener
 
 
         // start drawing the points.
-        g.setColor(Color.red);
+        g.setColor(Color.black);
         g.setClip(leftBorder, topBorder, width, height);
         try {
             boolean firstpoint = true;
             long lasttime = 0;
+            int lastproject = 1;
             int lastx = 0, lasty = 0;
 
             Enumeration listiter = logdata.elements();
             while (listiter.hasMoreElements())
             {
                 GraphEntry ge = (GraphEntry) listiter.nextElement();
+                if (firstpoint)
+                {
+                    if (ge.project == 1) g.setColor(Color.yellow);   // DES
+                    if (ge.project == 2) g.setColor(Color.red);      // RC5
+                    if (ge.project == 3) g.setColor(Color.green);    // CSC
+                    if (ge.project == 4) g.setColor(Color.blue);     // OGR
+                }
 
                 // convert to screen coords.
                 int tmpx = leftBorder + (int) ((float) width *
@@ -358,12 +366,32 @@ implements MouseMotionListener, MouseListener,ActionListener
                         // awhile, so draw a "drop" in the keyrate graph.
                         g.drawLine(lastx, lasty, lastx, topBorder + height);
                         g.drawLine(lastx, topBorder + height, tmpx, topBorder + height);
+                        if (ge.project == 0) g.setColor(Color.black);    // Unknown
+                        if (ge.project == 1) g.setColor(Color.yellow);   // DES
+                        if (ge.project == 2) g.setColor(Color.red);      // RC5
+                        if (ge.project == 3) g.setColor(Color.green);    // CSC
+                        if (ge.project == 4) g.setColor(Color.blue);     // OGR
                         g.drawLine(tmpx, topBorder + height, tmpx, tmpy);
                     }
                     else
                     {
-                        // otherwise just connect the line from the last one.
-                        g.drawLine(lastx, lasty, tmpx, tmpy);
+                        // Watch for a project switch
+                        if (ge.project == lastproject)
+                        {
+                            // otherwise just connect the line from the last one.
+                            g.drawLine(lastx, lasty, tmpx, tmpy);
+                        }
+                        else
+                        {
+                            // the project was swicted
+                            g.drawLine(lastx, lasty, lastx, topBorder + height);
+                            if (ge.project == 0) g.setColor(Color.black);    // Unknown
+                            if (ge.project == 1) g.setColor(Color.yellow);   // DES
+                            if (ge.project == 2) g.setColor(Color.red);      // RC5
+                            if (ge.project == 3) g.setColor(Color.green);    // CSC
+                            if (ge.project == 4) g.setColor(Color.blue);     // OGR
+                            g.drawLine(lastx, topBorder + height, tmpx, tmpy);
+                        }
                     }
                 }
 
@@ -371,11 +399,38 @@ implements MouseMotionListener, MouseListener,ActionListener
                 lastx = tmpx;
                 lasty = tmpy;
                 lasttime = ge.timestamp;
+                lastproject = ge.project;
                 firstpoint = false;
             }
         }
         catch (NoSuchElementException e) { }
+
+        //legenda
+        string_height = fm.getHeight();
+        string_height /= 2;
+        g.setColor(Color.yellow);     // DES
+        g.drawLine(leftBorder + 5, topBorder + 3 + (string_height / 2), leftBorder + 18, topBorder + 3 + (string_height / 2));
+        g.setColor(Color.black);
+        g.drawString("DES",leftBorder + 20, topBorder + 3 + string_height);
+        g.setColor(Color.red);     // RC5
+        g.drawLine(leftBorder + 5, topBorder + 6 + string_height + (string_height / 2), leftBorder + 18, topBorder + 6 + string_height + (string_height / 2));
+        g.setColor(Color.black);
+        g.drawString("RC5",leftBorder + 20, topBorder + 6 + (string_height * 2));
+        g.setColor(Color.green);     // CSC
+        g.drawLine(leftBorder + 5, topBorder + 9 + (string_height * 2) + (string_height / 2), leftBorder + 18, topBorder + 9 + (string_height * 2) + (string_height / 2));
+        g.setColor(Color.black);
+        g.drawString("CSC",leftBorder + 20, topBorder + 9 + (string_height * 3));
+        g.setColor(Color.blue);     // OGR
+        g.drawLine(leftBorder + 5, topBorder + 12 + (string_height * 3) + (string_height / 2), leftBorder + 18, topBorder + 12 + (string_height * 3) + (string_height / 2));
+        g.setColor(Color.black);
+        g.drawString("OGR",leftBorder + 20, topBorder + 12 + (string_height * 4));
+        g.setColor(Color.black);     // Unknown
+        g.drawLine(leftBorder + 5, topBorder + 15 + (string_height * 4) + (string_height / 2), leftBorder + 18, topBorder + 15 + (string_height * 4) + (string_height / 2));
+        g.setColor(Color.black);
+        g.drawString("Unknown", leftBorder + 20, topBorder + 15 + (string_height * 5));
+
         g.setClip(null);
+        g.setColor(Color.red);
 
         if (startx > 0)
         {
@@ -435,7 +490,7 @@ implements MouseMotionListener, MouseListener,ActionListener
 
             loggerstate = logloaded;
             repaint();
-//            System.out.println("load complete.  numrecords=" + logdata.size());
+            // System.out.println("load complete.  numrecords=" + logdata.size());
         }
     }
 

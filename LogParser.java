@@ -8,21 +8,24 @@ import java.text.*;
 import java.io.*;
 import java.util.*;
 
-
-public class LogParser
+class LogParser
 {
     private BufferedReader logfile;
     private Vector logdata;
 
 
-//   [Dec 16 03:25:59 UTC] Completed CSC packet 00205AE7:80000000 (4*2^28 keys)
-//                         0.00:22:46.15 - [786,534.65 keys/sec]
+// Past logging formats of the client (older to newer):
 //   [03/18/98 19:59:39 GMT] Completed block 00002752:E8100000 (2097152 keys)
 //                          00:00:03.75 - [517825.30 keys/sec]
 //   [May 31 23:24:19 GMT] Completed RC5 block 687C9CC2:40000000 (1073741824 keys)
 //                        0.00:19:29.52 - [918103.14 keys/sec]
 //   [Jul 18 03:00:57 GMT] Completed RC5 block 6DE46FD9:00000000 (2147483648 keys)
 //   [Jul 18 03:00:57 GMT] 0.01:59:18.82 - [299,977.15 keys/sec]
+//
+//   [Dec 16 03:25:59 UTC] Completed CSC packet 00205AE7:80000000 (4*2^28 keys)
+//                         0.00:22:46.15 - [786,534.65 keys/sec]
+//   [Jul 21 10:01:55 UTC] Completed OGR stub 24/2-9-13-29-15 (9,743,881,734 nodes)
+//                         0.00:45:22.11 - [3,579,527.43 nodes/sec]
 
 
     public LogParser(BufferedReader br, Vector list)
@@ -60,7 +63,7 @@ public class LogParser
     // last character in the parsed string.
     private int ConvertDecimalInteger(StringCharacterIterator sci)
             throws ParseException
-        // sci is modified, by reference.
+        // sci is modified by reference.
     {
         int value = 0;
         char ch = sci.next();
@@ -172,8 +175,7 @@ public class LogParser
 
         // Convert to seconds past epoc.
         // This uses a deprecated API, but it is still useful.
-        return Date.UTC(tm_year - 1900, tm_mon - 1,
-                tm_mday, tm_hour, tm_min, tm_sec) / 100;
+        return Date.UTC(tm_year - 1900, tm_mon - 1, tm_mday, tm_hour, tm_min, tm_sec) / 100;
     }
 
     // returns parsed duration.  throws exception on error.
@@ -204,6 +206,24 @@ public class LogParser
             (float) mins * (float) 60.0 + (float) secs);
     }
 
+    public int ParseProject (StringCharacterIterator sci)
+        throws ParseException
+    {
+        String project = "";
+        int projectcode;
+
+        projectcode = 0;
+        project += sci.next();
+        project += sci.next();
+        project += sci.next();
+        if (project.compareTo("DES") == 0) projectcode = 1;
+        if (project.compareTo("RC5") == 0) projectcode = 2;
+        if (project.compareTo("CSC") == 0) projectcode = 3;
+        if (project.compareTo("OGR") == 0) projectcode = 4;
+
+        return (int) projectcode;
+    }
+
 
     long lastTimeStamp = 0;
     long addValue = 0;
@@ -216,7 +236,8 @@ public class LogParser
             if (!logline1.startsWith("[") || logline1.indexOf("] Completed ") < 0)
                 return false;
 
-//System.out.println("line " + logline1.substring(1));
+            //System.out.println("line " + logline1.substring(1));
+
             // parse timestamp.
             ge.timestamp = ParseTimestamp(logline1.substring(1))+addValue;
             if ((ge.timestamp-lastTimeStamp) < -8640000)
@@ -228,30 +249,31 @@ public class LogParser
                 //System.out.println("line " + logline1.substring(1));
             }
             lastTimeStamp = ge.timestamp;
+            //System.out.println("got timestamp " + ge.timestamp);
 
-
-//System.out.println("got timestamp " + ge.timestamp);
+            // parse project.
+            int prjoffset = logline1.indexOf("Completed ");
+            if (prjoffset < 0) return false;
+            ge.project = ParseProject(new StringCharacterIterator(logline1, prjoffset+9));
+            //System.out.println("got project " + ge.project);
 
             // parse keycount.
             int keyoffset = logline1.indexOf('(');
             if (keyoffset < 0) return false;
             ge.keycount = (long) ConvertDecimalInteger(new StringCharacterIterator(logline1, keyoffset));
-
-//System.out.println("got keycount " + ge.keycount);
+            //System.out.println("got keycount " + ge.keycount);
 
             // parse the keyrate.
             int rateoffset = logline2.lastIndexOf('[');
             if (rateoffset < 0) return false;
             ge.rate = (float) ConvertDecimalFloat(new StringCharacterIterator(logline2, rateoffset));
-
-//System.out.println("got keyrate " + ge.rate);
+            //System.out.println("got keyrate " + ge.rate);
 
             // parse duration.
             int duroffset = logline2.lastIndexOf(' ', rateoffset - 4);
             if (duroffset < 0) return false;
             ge.duration = ParseDuration(new StringCharacterIterator(logline2, duroffset));
-
-//System.out.println("got duration " + ge.duration);
+            //System.out.println("got duration " + ge.duration);
 
 
             // successful parse complete.
