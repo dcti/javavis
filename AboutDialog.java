@@ -29,7 +29,7 @@ class AboutDialog extends Dialog
     AboutDialog(Frame parent)
     {
         super(parent, "About this program", true);
-        setSize(340,200);
+        setSize(340,240);
         setLocation(50,50);
         setResizable(false);
         LayoutManager layout = new GridBagLayout();
@@ -43,6 +43,7 @@ class AboutDialog extends Dialog
         add(new Label("Jeff \"Bovine\" Lawson <jlawson@bovine.net>"), gbc);
         add(new Label("William Goo <wgoo@hmc.edu>"), gbc);
         add(new Label("Yves Hetzer <aetsch@gmx.de>"), gbc);
+        add(new Label("Greg Hewgill <greg@hewgill.com>"), gbc);
         add(new Label(), gbc);
         gbc.insets.left = 0;
         gbc.fill = GridBagConstraints.NONE;
