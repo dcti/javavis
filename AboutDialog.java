@@ -1,4 +1,4 @@
-// Copyright distributed.net 1997-1999 - All Rights Reserved
+// Copyright distributed.net 1997-2000 - All Rights Reserved
 // For use in distributed.net projects only.
 // Any other distribution or use of this source violates copyright.
 //
@@ -38,7 +38,7 @@ class AboutDialog extends Dialog
         gbc.insets.left = 60;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
-        add(new Label("distributed.net Log Visualizer v1.4"), gbc);
+        add(new Label("distributed.net Log Visualizer v1.5"), gbc);
         add(new Label("programmed by:"), gbc);
         add(new Label("  Jeff \"Bovine\" Lawson <jlawson@bovine.net>"), gbc);
         add(new Label("  William Goo <wgoo@hmc.edu>"), gbc);
