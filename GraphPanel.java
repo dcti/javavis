@@ -135,7 +135,9 @@ public class GraphPanel extends JPanel
         // draw horizontal lines
         g.setColor(Color.black);
         for (double r = minrate + yinterval; r < maxrate; r += yinterval) {
-            g.drawLine((int) timelo, (int) r, (int) timehi, (int) r);
+            int y = topBorder + (int) ((float) height *
+                (float) (r - minrate) / (float) (maxrate - minrate));
+            g.drawLine(leftBorder, y, leftBorder + width, y);
         }
 
 /*
@@ -223,53 +225,52 @@ public class GraphPanel extends JPanel
 
         // start drawing the points.
         g.setColor(Color.red);
+        g.setClip(leftBorder, topBorder, width, height);
         try {
             boolean firstpoint = true;
-        	long lasttime = 0;
-        	int lastx = 0, lasty = 0;
+            long lasttime = 0;
+            int lastx = 0, lasty = 0;
             
             ListIterator listiter = logdata.listIterator();
             while (listiter.hasNext())
             {
                 GraphEntry ge = (GraphEntry) listiter.next();
 
-                if (ge.timestamp >= timelo &&
-                    ge.timestamp <= timehi &&
-                    ge.rate >= minrate &&
-                    ge.rate <= maxrate)
+                // convert to screen coords.
+                int tmpx = leftBorder + (int) ((float) width *
+                    (float) (ge.timestamp - timelo) / (float) (timehi - timelo));
+                int tmpy = topBorder + height - (int) ((float) height *
+                    (float) (ge.rate - minrate) / (float) (maxrate - minrate));
+
+                // plot the point.
+                if (!firstpoint)
                 {
-            		// convert to screen coords
-            		int tmpx = leftBorder + (int) ((float) width *
-            		    (float) (ge.timestamp - timelo) / (float) (timehi - timelo));
-            		int tmpy = topBorder + height - (int) ((float) height *
-            		    (float) (ge.rate - minrate) / (float) (maxrate - minrate));
-
-
-                    if (!firstpoint)
+                    if ((ge.timestamp - lasttime) > 300 + 1.25 * ge.duration)
                     {
-                        if ((ge.timestamp - lasttime) > 300 + 1.25 * ge.duration)
-                        {
-                            // There was a significant lapse in time since the last point,
-                            // which probably indicates that the client was turned off for
-                            // awhile, so draw a "drop" in the keyrate graph.
-                            g.drawLine(lastx, lasty, lastx, topBorder + height);
-                            g.drawLine(lastx, topBorder + height, tmpx, topBorder + height);
-                            g.drawLine(tmpx, topBorder + height, tmpx, tmpy);
-                        }
-                        else
-                        {
-                            // otherwise just connect the line from the last one.
-                            g.drawLine(lastx, lasty, tmpx, tmpy);
-                        }
+                        // There was a significant lapse in time since the last point,
+                        // which probably indicates that the client was turned off for
+                        // awhile, so draw a "drop" in the keyrate graph.
+                        g.drawLine(lastx, lasty, lastx, topBorder + height);
+                        g.drawLine(lastx, topBorder + height, tmpx, topBorder + height);
+                        g.drawLine(tmpx, topBorder + height, tmpx, tmpy);
                     }
-                    lastx = tmpx;
-                    lasty = tmpy;
-                    lasttime = ge.timestamp;
-                    firstpoint = false;
+                    else
+                    {
+                        // otherwise just connect the line from the last one.
+                        g.drawLine(lastx, lasty, tmpx, tmpy);
+                    }
                 }
+
+                // remember this point for next time.
+                lastx = tmpx;
+                lasty = tmpy;
+                lasttime = ge.timestamp;
+                firstpoint = false;
             }
         }
         catch (NoSuchElementException e) { }
+        g.setClip(null);
+
 
         // Done!
         return;
