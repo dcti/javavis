@@ -1,4 +1,4 @@
-// Copyright distributed.net 1997-2000 - All Rights Reserved
+// Copyright distributed.net 1997-2001 - All Rights Reserved
 // For use in distributed.net projects only.
 // Any other distribution or use of this source violates copyright.
 //
@@ -223,10 +223,10 @@ class LogParser
         project += sci.next();
         project += sci.next();
         project += sci.next();
-        if (project.compareTo("DES") == 0) projectcode = 1;
-        if (project.compareTo("RC5") == 0) projectcode = 2;
-        if (project.compareTo("CSC") == 0) projectcode = 3;
-        if (project.compareTo("OGR") == 0) projectcode = 4;
+        if (project.compareTo("RC5") == 0) projectcode = 1;
+        else if (project.compareTo("DES") == 0) projectcode = 2;
+        else if (project.compareTo("CSC") == 0) projectcode = 3;
+        else if (project.compareTo("OGR") == 0) projectcode = 4;
 
         return (int) projectcode;
     }
