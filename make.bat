@@ -3,6 +3,6 @@ del *.class
 del *.jar
 javac RC5graph.java
 if errorlevel 1 goto end
-jar cvfm RC5graph.jar MANIFEST.MF *.class *.gif
+jar cvfm JavaVis.jar MANIFEST.MF *.class *.gif
 
 :end
