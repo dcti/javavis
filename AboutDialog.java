@@ -5,39 +5,62 @@
 
 import java.awt.*;
 import java.awt.event.*;
+import java.net.URL;
 
 
 class AboutDialog extends Dialog
 {
-    class OKButton extends Button implements ActionListener {
-        Dialog dlgsave;
+    private Image Cow;
 
-        public OKButton(Dialog dlg)
-		{
-		    super("OK");
-		    dlgsave = dlg;
-			addActionListener(this);
-		}
+    class OKButton extends Button implements ActionListener
+    {
+        public OKButton()
+        {
+            super("OK");
+            addActionListener(this);
+        }
 
-		public void actionPerformed(ActionEvent e)
-		{
-		    dlgsave.setVisible(false);
-		}
+        public void actionPerformed(ActionEvent e)
+        {
+            AboutDialog.this.setVisible(false);
+        }
     }
 
     AboutDialog(Frame parent)
     {
         super(parent, "About this program", true);
-        setSize(300,200);
+        setSize(340,200);
         setLocation(50,50);
         setResizable(false);
-        add("North", new Label("distributed.net Log Visualizer v1.0"));
-        add("North", new Label("programmed by:"));
-        add("North", new Label("Jeff \"Bovine\" Lawson <jlawson@bovine.net>"));
-        add("North", new Label("William Goo <wgoo@hmc.edu>"));
-        add("North", new Label("Yves Hetzer <aetsch@gmx.de>"));
-        add("South", new OKButton(this));
+        LayoutManager layout = new GridBagLayout();
+        setLayout(layout);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets.left = 60;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        add(new Label("distributed.net Log Visualizer v1.0"), gbc);
+        add(new Label("programmed by:"), gbc);
+        add(new Label("Jeff \"Bovine\" Lawson <jlawson@bovine.net>"), gbc);
+        add(new Label("William Goo <wgoo@hmc.edu>"), gbc);
+        add(new Label("Yves Hetzer <aetsch@gmx.de>"), gbc);
+        add(new Label(), gbc);
+        gbc.insets.left = 0;
+        gbc.fill = GridBagConstraints.NONE;
+        add(new OKButton(), gbc);
+
+        if (getClass().getClassLoader() != null) {
+            URL res = getClass().getClassLoader().getResource("cowhead.gif");
+            if (res != null) {
+                Cow = getToolkit().getImage(res);
+            }
+        }
+    }
+
+    public void paint(Graphics g)
+    {
+        super.paint(g);
+        if (Cow != null) {
+            g.drawImage(Cow, 15, 32, this);
+        }
     }
 }
-
-
