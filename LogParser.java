@@ -38,6 +38,7 @@ public class LogParser
         String s1 = null, s2 = null;
 
         try {
+            s1 = logfile.readLine();
             while(logfile.ready())
             {
                 s2 = logfile.readLine();
@@ -63,130 +64,145 @@ public class LogParser
         // sci is modified, by reference.
     {
         int value = 0;
-        char ch = sci.current();
-        if (ch < 0x0030 || ch > 0x0039)
-            throw new ParseException("invalid digit", sci.getIndex());
+        char ch = sci.next();
+        if (ch < 0x0030 || ch > 0x0039) {
+            sci.previous();
+            throw new ParseException("invalid digit " + ch, sci.getIndex());
+        }
         for (;;) {
             value = (value * 10) + (ch - 0x0030);
             ch = sci.next();
-            if (ch == CharacterIterator.DONE ||
-                ch < 0x0030 || ch > 0x0039) break;
+            if (ch == CharacterIterator.DONE) break;
+            else if (ch == ',') ch = sci.next();
+            if (ch < 0x0030 || ch > 0x0039) { sci.previous(); break; }
         }
         return value;
+    }
+
+    // Implements a custom decimal string parser for the StringCharacterIterator
+    // class, that allows our caller to easily continue parsing after the
+    // last character in the parsed string.
+    private float ConvertDecimalFloat(StringCharacterIterator sci)
+            throws ParseException, NumberFormatException
+        // sci is modified by reference.
+    {
+        String str = "";
+        char ch = sci.next();
+        if (ch != '.' && (ch < 0x0030 || ch > 0x0039)) {
+            sci.previous();
+            throw new ParseException("invalid digit2 " + ch, sci.getIndex());
+        }
+        for (;;) {
+            str += ch;
+            ch = sci.next();
+            if (ch == CharacterIterator.DONE) break;
+            else if (ch == ',') ch = sci.next();
+            if (ch != '.' && (ch < 0x0030 || ch > 0x0039)) { sci.previous(); break; }
+        }
+        return (float) Float.valueOf(str).floatValue();
     }
 
     // returns the matching month name.  raises exception on error.
     private int ConvertMonthName(String month)
         throws ParseException
     {
-        if (month == "Jan") return 1;
-        if (month == "Feb") return 2;
-        if (month == "Mar") return 3;
-        if (month == "Apr") return 4;
-        if (month == "May") return 5;
-        if (month == "Jun") return 6;
-        if (month == "Jul") return 7;
-        if (month == "Aug") return 8;
-        if (month == "Sep") return 9;
-        if (month == "Oct") return 10;
-        if (month == "Nov") return 11;
-        if (month == "Dec") return 12;
-        throw new ParseException("invalid month", 0);
+        if (month.compareTo("Jan") == 0) return 1;
+        if (month.compareTo("Feb") == 0) return 2;
+        if (month.compareTo("Mar") == 0) return 3;
+        if (month.compareTo("Apr") == 0) return 4;
+        if (month.compareTo("May") == 0) return 5;
+        if (month.compareTo("Jun") == 0) return 6;
+        if (month.compareTo("Jul") == 0) return 7;
+        if (month.compareTo("Aug") == 0) return 8;
+        if (month.compareTo("Sep") == 0) return 9;
+        if (month.compareTo("Oct") == 0) return 10;
+        if (month.compareTo("Nov") == 0) return 11;
+        if (month.compareTo("Dec") == 0) return 12;
+        throw new ParseException("invalid month " + month, 0);
     }
 
-    // returns true if successfully parsed.
-    private boolean ParseTimestamp(String stamp, GraphEntry ge)
-        // ge is modified, by reference.
+    // returns parsed timestamp.  raises exception on error.
+    private long ParseTimestamp(String stamp)
+        throws ParseException
     {
         int tm_mon, tm_mday, tm_year, tm_hour, tm_min, tm_sec;
-        try {
-            StringCharacterIterator sci = new StringCharacterIterator(stamp);
-            if (Character.isDigit(sci.first()))
-            {
-                // Parse a timestamp of format "%u/%u/%u %u:%u:%u"
-                tm_mon = ConvertDecimalInteger(sci);
-                if (sci.next() != '/') throw new ParseException("bad separator", sci.getIndex());
-                tm_mday = ConvertDecimalInteger(sci);
-                if (sci.next() != '/') throw new ParseException("bad separator", sci.getIndex());
-                tm_year = ConvertDecimalInteger(sci);
-                if (sci.next() != ' ') throw new ParseException("bad separator", sci.getIndex());
-                tm_hour = ConvertDecimalInteger(sci);
-                if (sci.next() != ':') throw new ParseException("bad separator", sci.getIndex());
-                tm_min = ConvertDecimalInteger(sci);
-                if (sci.next() != ':') throw new ParseException("bad separator", sci.getIndex());
-                tm_sec = ConvertDecimalInteger(sci);
-            }
-            else
-            {
-                // Convert a timestamp of format "%3s %u %u:%u:%u"
-                tm_mon = ConvertMonthName(stamp.substring(0, 3));
-                if (sci.setIndex(3) != ' ') throw new ParseException("bad separator", sci.getIndex());
-                tm_mday = ConvertDecimalInteger(sci);
-                if (sci.next() != ' ') throw new ParseException("bad separator", sci.getIndex());
-                tm_hour = ConvertDecimalInteger(sci);
-                if (sci.next() != ':') throw new ParseException("bad separator", sci.getIndex());
-                tm_min = ConvertDecimalInteger(sci);
-                if (sci.next() != ':') throw new ParseException("bad separator", sci.getIndex());
-                tm_sec = ConvertDecimalInteger(sci);
-                tm_year = 1998;     // hard coded for now.
-            }
-
-            // correct the date to a full 4-digit year
-            if (tm_year < 0) return false;
-            else if (tm_year < 70) tm_year += 2000;
-            else if (tm_year < 100) tm_year += 1900;
-
-            // validate all fields
-            if (tm_mon < 1 || tm_mon > 12 ||
-              tm_mday < 1 || tm_mday > 31 ||
-              tm_year < 1970 || tm_year >= 2038 ||
-              tm_hour < 0 || tm_hour > 23 ||
-              tm_min < 0 || tm_min > 59 ||
-              tm_sec < 0 || tm_sec > 59) return false;
-
-        }
-        catch (Exception E)
+        StringCharacterIterator sci = new StringCharacterIterator(stamp);
+        if (Character.isDigit(sci.first()))
         {
-            return false;
+            // Parse a timestamp of format "%u/%u/%u %u:%u:%u"
+            tm_mon = ConvertDecimalInteger(sci);
+            if (sci.next() != '/') throw new ParseException("bad separator", sci.getIndex());
+            tm_mday = ConvertDecimalInteger(sci);
+            if (sci.next() != '/') throw new ParseException("bad separator", sci.getIndex());
+            tm_year = ConvertDecimalInteger(sci);
+            if (sci.next() != ' ') throw new ParseException("bad separator", sci.getIndex());
+            tm_hour = ConvertDecimalInteger(sci);
+            if (sci.next() != ':') throw new ParseException("bad separator", sci.getIndex());
+            tm_min = ConvertDecimalInteger(sci);
+            if (sci.next() != ':') throw new ParseException("bad separator", sci.getIndex());
+            tm_sec = ConvertDecimalInteger(sci);
         }
+        else
+        {
+            // Convert a timestamp of format "%3s %u %u:%u:%u"
+            tm_mon = ConvertMonthName(stamp.substring(0, 3));
+            if (sci.setIndex(3) != ' ') throw new ParseException("bad separator1", sci.getIndex());
+            tm_mday = ConvertDecimalInteger(sci);
+            if (sci.next() != ' ') throw new ParseException("bad separator2", sci.getIndex());
+            tm_hour = ConvertDecimalInteger(sci);
+            if (sci.next() != ':') throw new ParseException("bad separator3", sci.getIndex());
+            tm_min = ConvertDecimalInteger(sci);
+            if (sci.next() != ':') throw new ParseException("bad separator4", sci.getIndex());
+            tm_sec = ConvertDecimalInteger(sci);
+            tm_year = 1998;     // hard coded for now.
+        }
+
+        // correct the date to a full 4-digit year
+        if (tm_year < 0) throw new ParseException("bad year", sci.getIndex());
+        else if (tm_year < 70) tm_year += 2000;
+        else if (tm_year < 100) tm_year += 1900;
+
+        // validate all fields
+        if (tm_mon < 1 || tm_mon > 12 ||
+            tm_mday < 1 || tm_mday > 31 ||
+            tm_year < 1970 || tm_year >= 2038 ||
+            tm_hour < 0 || tm_hour > 23 ||
+            tm_min < 0 || tm_min > 59 ||
+            tm_sec < 0 || tm_sec > 59)
+            throw new ParseException("bad field value", sci.getIndex());
 
         // Convert to seconds past epoc.
         // This uses a deprecated API, but it is still useful.
-        ge.timestamp = Date.UTC(tm_year - 1900, tm_mon - 1,
+        return Date.UTC(tm_year - 1900, tm_mon - 1,
                 tm_mday, tm_hour, tm_min, tm_sec) / 100;
-        return true;
     }
 
-    // returns true if successfully parsed.
-        // ge is modified, by reference.
-    public boolean ParseDuration(String stamp, GraphEntry ge)
+    // returns parsed duration.  throws exception on error.
+    public float ParseDuration(StringCharacterIterator sci)
+        throws ParseException
     {
         int days, hours, mins;
         float secs;
-        try {
-            StringCharacterIterator sci = new StringCharacterIterator(stamp);
-            days = ConvertDecimalInteger(sci);
-            switch (sci.next()) {
-                case ':':
-                    hours = days; days = 0; break;
-                case '.':
-                    hours = ConvertDecimalInteger(sci);
-                    if (sci.next() != ':') throw new ParseException("", sci.getIndex());
-                    break;
-                default:
-                    throw new ParseException("", sci.getIndex());
-            }
-            mins = ConvertDecimalInteger(sci);
-            if (sci.next() != ':') throw new ParseException("", sci.getIndex());
-            secs = (float) Float.valueOf(stamp.substring(sci.getIndex())).floatValue();
+
+        days = ConvertDecimalInteger(sci);
+        switch (sci.next()) {
+            case ':':
+                hours = days; days = 0; break;
+            case '.':
+                hours = ConvertDecimalInteger(sci);
+                if (sci.next() != ':')
+                    throw new ParseException("bad duration separator", sci.getIndex());
+                break;
+            default:
+                throw new ParseException("bad duration separator", sci.getIndex());
         }
-        catch (Exception E)
-        {
-            return false;
-        }
-        ge.duration = (float) (24.0 * days + hours) * (float) 3600.0 +
-            (float) mins * (float) 60.0 + (float) secs;
-        return true;
+        mins = ConvertDecimalInteger(sci);
+        if (sci.next() != ':')
+            throw new ParseException("bad duration separator", sci.getIndex());
+        secs = ConvertDecimalFloat(sci);
+
+        return (float) ((24.0 * days + hours) * (float) 3600.0 +
+            (float) mins * (float) 60.0 + (float) secs);
     }
 
     // returns true if successfully parsed.
@@ -199,35 +215,37 @@ public class LogParser
                 return false;
 
             // parse timestamp.
-            if (!ParseTimestamp(logline1.substring(1), ge))
-                return false;
+            ge.timestamp = ParseTimestamp(logline1.substring(1));
+
+//System.out.println("got timestamp " + ge.timestamp);
 
             // parse keycount.
             int keyoffset = logline1.indexOf('(');
             if (keyoffset < 0) return false;
-            ge.keycount = Long.parseLong(logline1.substring(keyoffset + 1));
+            ge.keycount = (long) ConvertDecimalInteger(new StringCharacterIterator(logline1, keyoffset));
+
+//System.out.println("got keycount " + ge.keycount);
 
             // parse the keyrate.
             int rateoffset = logline2.lastIndexOf('[');
             if (rateoffset < 0) return false;
-            String ratestr = logline2.substring(rateoffset + 1);
-            while ((rateoffset = ratestr.indexOf(',')) >= 0) // get rid of commas
-            {
-                ratestr = ratestr.substring(0, rateoffset) +
-                    ratestr.substring(rateoffset + 1);
-            }
-            ge.rate = (float) Float.valueOf(ratestr).floatValue();
+            ge.rate = (float) ConvertDecimalFloat(new StringCharacterIterator(logline2, rateoffset));
+
+//System.out.println("got keyrate " + ge.rate);
 
             // parse duration.
             int duroffset = logline2.lastIndexOf(' ', rateoffset - 4);
             if (duroffset < 0) return false;
-            if (!ParseDuration(logline2.substring(duroffset + 1), ge))
-                return false;
+            ge.duration = ParseDuration(new StringCharacterIterator(logline2, duroffset));
+
+//System.out.println("got duration " + ge.duration);
+
 
             // successful parse complete.
             return true;
         }
         catch (Exception E) {
+            System.out.println("parse exception " + E);
             return false;
         }
     }
