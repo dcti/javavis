@@ -1,0 +1,19 @@
+The following is a list of items that are open for development by
+others. If you would like to do one of these items, or something else
+that you have thought of that is not listed, please let your intentions
+be known to Jeff Lawson <bovine@distributed.net>
+
+==========
+
+- add acceptance of log filename to load on the command line.
+
+- add a "Refresh" menu item to the "File" menu.
+
+- add a "Status bar" and display the progress/notification messages
+there, instead of painting them within the graph window.
+
+- add a persisted Most-Recently-Used list of log filenames that have
+been loaded by the log visualizer.
+
+
+
