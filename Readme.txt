@@ -16,7 +16,7 @@ If you have the Sun JAVA SDK installed, execute this JAR with:
 	java -jar JavaVis.jar
 
 If you have the Microsoft Java VM installed, execute this JAR with:
-	jview /cp:a JavaVis.jar RC5graph.class
+	jview /cp:a JavaVis.jar JavaVis.class
 
 
 
