@@ -1,3 +1,8 @@
+// Copyright distributed.net 1997-1999 - All Rights Reserved
+// For use in distributed.net projects only.
+// Any other distribution or use of this source violates copyright.
+//
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
