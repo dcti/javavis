@@ -6,11 +6,15 @@
 import java.io.File;
 import java.awt.*;
 import java.awt.event.*;
+import com.apple.mrj.*;
 
 // Main Frame
-public class RC5graph extends Frame
+public class RC5graph extends Frame 
+                      implements MRJAboutHandler, MRJOpenDocumentHandler, MRJQuitHandler
 {
     GraphPanel graphPanel;
+    final AboutDialog aboutDialog = new AboutDialog(this);
+    MenuItem refreshItem;
 
     // Constructor
     public RC5graph(String title)
@@ -42,40 +46,52 @@ public class RC5graph extends Frame
                 String filename = fileDialog.getFile();
                 if (filename != null) {
                     File file = new File(fileDialog.getDirectory(), filename);
-                    if (file.exists())
-                    {
-                        graphPanel.currentLogFile = file;
-                        graphPanel.readLogData();
-                    }
+                    handleOpenFile(file);
                 }
 
             }
         });
-//        menuItem.setMnemonic(KeyEvent.VK_O);
+        menuItem.setShortcut(new MenuShortcut(KeyEvent.VK_O));
         menu.add(menuItem);
-
-        menuItem = new MenuItem("Exit");
-        menuItem.addActionListener(new ActionListener() {
+        
+        refreshItem = new MenuItem("Refresh");
+        refreshItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                System.exit(0);
+                graphPanel.readLogData();
             }
         });
-        menuItem.setShortcut(new MenuShortcut(KeyEvent.VK_X));
+        refreshItem.setShortcut(new MenuShortcut(KeyEvent.VK_R));
+        refreshItem.setEnabled(false);
+        menu.add(refreshItem);
+        menu.addSeparator();
+
+        menuItem = new MenuItem("Quit");
+        menuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                handleQuit();
+            }
+        });
+        menuItem.setShortcut(new MenuShortcut(KeyEvent.VK_Q));
         menu.add(menuItem);
 
         menu = new Menu("Help");
-        menu.setShortcut(new MenuShortcut(KeyEvent.VK_H));
-        menuBar.add(menu);
 
-        menuItem = new MenuItem("About");
-        final AboutDialog aboutDialog = new AboutDialog(this);
+        menuItem = new MenuItem("About JavaVis...");
         menuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                aboutDialog.show();
+                handleAbout();
             }
         });
         menuItem.setShortcut(new MenuShortcut(KeyEvent.VK_A));
         menu.add(menuItem);
+        try {
+            menuBar.setHelpMenu(menu);
+            // avoid the double Help menu problem on Mac OS 8 and later
+        } catch (Throwable thrown) {
+            // in case we are on an older JDK which doesn't support this function
+            // fall back on old strategy
+            menuBar.add(menu);
+        }
     }
 
     public Component createComponents()
@@ -95,7 +111,7 @@ public class RC5graph extends Frame
     public static void main(String[] args)
     {
         // Create the top-level container and add contents to it.
-        RC5graph app = new RC5graph("distributed.net Logfile Visualizer");
+        final RC5graph app = new RC5graph("distributed.net Logfile Visualizer");
         Component contents = app.createComponents();
 //        app.getContentPane().add(contents, BorderLayout.CENTER);
         app.setBackground(Color.lightGray);
@@ -106,10 +122,32 @@ public class RC5graph extends Frame
         // Finish setting up the frame, and show it.
         app.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                System.exit(0);
+                app.handleQuit();
             }
         });
         app.pack();
         app.setVisible(true);
+        MRJApplicationUtils.registerAboutHandler(app);
+        MRJApplicationUtils.registerQuitHandler(app);
+        MRJApplicationUtils.registerOpenDocumentHandler(app);
+        if (args.length >= 1) {
+            app.handleOpenFile(new File(args[0]));
+        }
+    }
+    
+    public void handleOpenFile(File file) {
+        if (file.exists()) {
+            graphPanel.currentLogFile = file;
+            graphPanel.readLogData();
+            refreshItem.setEnabled(true);
+        }
+    }
+    
+    public void handleAbout() {
+        aboutDialog.show();
+    }
+    
+    public void handleQuit() {
+        System.exit(0);
     }
 }
