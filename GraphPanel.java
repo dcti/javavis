@@ -1,99 +1,119 @@
+// Copyright distributed.net 1997-1999 - All Rights Reserved
+// For use in distributed.net projects only.
+// Any other distribution or use of this source violates copyright.
+//
+
+import java.io.*;
+import java.util.*;         // java.util.AbstractList
 import java.awt.*;
 import javax.swing.*;
-//import javax.swing.SwingUtilities;
 
 
-public class GraphPanel extends JPanel {
-	
-	// Empty borders
-	protected final int topBorder 		= 10;
-	protected final int bottomBorder 	= 45;
-	protected final int leftBorder 		= 55;
-	protected final int rightBorder 	= 20;
-	protected int width, height;
-	
-	protected Color grayShade = new Color(235, 235, 235);
-	
-	// storage variables.
-	protected TDoubleListImp logdata = new TDoubleListImp();
-	protected double mintime, maxtime;
-	protected double minrate, maxrate;
-	protected double totalkeys;
-	protected double rangestart, rangeend;
+public class GraphPanel extends JPanel
+{
+    // Empty borders
+    protected final int topBorder       = 10;
+    protected final int bottomBorder    = 45;
+    protected final int leftBorder      = 55;
+    protected final int rightBorder     = 20;
+    protected int width, height;
 
-	// current graphing state.
-	protected final int nologloaded 	= 0;
-	protected final int lognotfound 	= 1;
-	protected final int loadinprogress 	= 2;
-	protected final int logloaded 		= 3;
-	protected int loggerstate;
-	
-	public File currentLogFile;
-	
-	
-	// public interface methods.
-	void getDataRange(double start, double end)
-	{ start = mintime; end = maxtime; }
+    // user-interface
+    protected Color grayShade = new Color(235, 235, 235);
+
+    // storage variables.
+    protected java.util.List logdata = Collections.synchronizedList(new ArrayList());
+    protected long mintime, maxtime;
+    protected double minrate, maxrate;
+    protected double totalkeys;
+    protected long rangestart, rangeend;
+
+    // current graphing state.
+    protected final int nologloaded     = 0;
+    protected final int lognotfound     = 1;
+    protected final int loadinprogress  = 2;
+    protected final int logloaded       = 3;
+    protected int loggerstate;
+
+    // other
+    public File currentLogFile;
+
+
+    // constructor
+    public GraphPanel()
+    {
+        // set the default ranges
+        rangestart = -1;
+        rangeend = -1;
     
-	// public interface methods.
-	void getRange(double start, double end)
-	{ start = rangestart; end = rangeend; }
+        // set the flags
+        loggerstate = nologloaded;
+    }
+
+
+    // public interface methods.
+    void getDataRange(long start, long end)
+        { start = mintime; end = maxtime; }
     
-	// public interface methods.
-	void setRange(double start, double end)
-	{ rangestart = start; rangeend = end; }
-	
-	// public interface methods.
-	boolean isDataAvailable(void)
-	{ return (loggerstate.current == logloaded) && (!logdata.IsEmpty()) &&
-          (minrate != maxrate) && (mintime != maxtime); }
+    // public interface methods.
+    void getRange(long start, long end)
+        { start = rangestart; end = rangeend; }
+    
+    // public interface methods.
+    void setRange(long start, long end)
+        { rangestart = start; rangeend = end; }
+    
+    // public interface methods.
+    boolean isDataAvailable()
+        { return (loggerstate == logloaded) &&
+            (!logdata.isEmpty()) &&
+              (minrate < maxrate) && (mintime < maxtime); }
   
   
-    public void paintComponent(Graphics g) {
-    	
-		
-		if (loggerstate == loadinprogress) {
-			drawString(g, "Please wait, currently reloading log file.",
-			    0, leftBorder, topBorder);
-			return;
-		}
-		else if (loggerstate == lognotfound) {
-			drawString(g, "Could not load any data for graphing.  This may " +
-			    "indicate that there was a problem opening the log file.",
-			    0, leftBorder, topBorder);
-			return;
-		}
-		else if (loggerstate == nologloaded) {
-			drawString(g, "You must specify a log file to be used for graph visualization.",
-			    0, leftBorder, topBorder);
-			return;
-		}
-		else if (logdata.IsEmpty() || minrate == maxrate || mintime == maxtime) {
-			drawString(g, "Could not load any data for graphing.  This may " +
-			    "indicate that there was no graphable data inside of the " +
-			    "specified log file",
-			    0, leftBorder, topBorder);
-			return;
-		}
-    	
-    	
-    	// Determine dimensions of graph area.
-    	width = this.getWidth() - (leftBorder + rightBorder);
-    	height = this.getHeight() - (topBorder + bottomBorder);
+    public void paintComponent(Graphics g)
+    {
+        if (loggerstate == loadinprogress) {
+            g.drawString("Please wait, currently reloading log file.",
+                leftBorder, topBorder);
+            return;
+        }
+        else if (loggerstate == lognotfound) {
+            g.drawString("Could not load any data for graphing.  This may " +
+                "indicate that there was a problem opening the log file.",
+                leftBorder, topBorder);
+            return;
+        }
+        else if (loggerstate == nologloaded) {
+            g.drawString("You must specify a log file to be used for graph visualization.",
+                leftBorder, topBorder);
+            return;
+        }
+        else if (logdata.isEmpty() || minrate >= maxrate || mintime >= maxtime) {
+            g.drawString("Could not load any data for graphing.  This may " +
+                "indicate that there was no graphable data inside of the " +
+                "specified log file",
+                leftBorder, topBorder);
+            return;
+        }
+        
+        
+        // Determine dimensions of graph area.
+        width = this.getWidth() - (leftBorder + rightBorder);
+        height = this.getHeight() - (topBorder + bottomBorder);
 
         
-		// determine the range window that we will draw
-		int timelo = (rangestart == -1 ? mintime : rangestart);
-		int timehi = (rangeend == -1 ? maxtime : rangeend);
-		if (timehi <= timelo) return;
-		
-		FontMetrics fm = g.getFontMetrics();
+        // determine the range window that we will draw
+        long timelo = (rangestart == -1 ? mintime : rangestart);
+        long timehi = (rangeend == -1 ? maxtime : rangeend);
+        if (timehi <= timelo) return;
         
-		// set up the graphing window structure and scaling
-		double yinterval = (maxrate - minrate) / height * (fm.getHeight * 4);
-		int xinterval = (timehi - timelo) / width * (fm.charWidth('A') * 10);
-		
-    	// Paint the window background.
+        FontMetrics fm = g.getFontMetrics();
+        
+        // set up the graphing window structure and scaling
+        double yinterval = (maxrate - minrate) / height * (fm.getHeight() * 4);
+        long xinterval = (timehi - timelo) / width * (fm.charWidth('A') * 10);
+        
+        // Paint the window background.
         super.paintComponent(g);
         
         // Start with a white graph area.
@@ -103,23 +123,36 @@ public class GraphPanel extends JPanel {
         // Add gray shading to graph area.
         g.setColor(grayShade);
         for(int i=0 ; i<width ; i+=100) {
-        	if((i+50)>width) {
-        		g.fillRect((leftBorder+i), topBorder, (width-i), height);
-        	} else {
-        		g.fillRect((leftBorder+i), topBorder, 50, height);
-        	}
+            if((i+50)>width) {
+                g.fillRect((leftBorder+i), topBorder, (width-i), height);
+            } else {
+                g.fillRect((leftBorder+i), topBorder, 50, height);
+            }
         }
-		
-		// draw horizontal lines
-		g.setColor(Color.black);
-		for (double r = minrate + yinterval; r < maxrate; r += yinterval) {
-			drawLine(timelo, r, timehi, r);
-		}
-		
-		// start drawing the points
-		g.setColor(Color.red);
-		logdata.ForEach(
-		
+        
+        // draw horizontal lines
+        g.setColor(Color.black);
+        for (double r = minrate + yinterval; r < maxrate; r += yinterval) {
+            g.drawLine((int) timelo, (int) r, (int) timehi, (int) r);
+        }
+        
+        // start drawing the points.
+        g.setColor(Color.red);
+        try {
+            GraphEntry ge;
+            for (ListIterator listiter = logdata.listIterator();
+                    ge = (GraphEntry) listiter.next();
+                    listiter.hasNext())
+            {
+
+            }
+        }
+        catch (NoSuchElementException e) { }
+        
+                
+            
+
+
 /*
   HPEN graphline = CreatePen(PS_SOLID, 2, RGB(0x99, 0x33, 0x33));
   oldpen = SelectObject(dc, graphline);
@@ -127,7 +160,7 @@ public class GraphPanel extends JPanel {
   SelectObject(dc, oldpen);
   DeleteObject(graphline);
   
-		
+        
   // change to a small black pen for drawing the tick marks.
   HGDIOBJ oldbrush = SelectObject(dc, GetSysColorBrush(COLOR_WINDOWTEXT));
   SetBkMode(dc, TRANSPARENT);
@@ -200,72 +233,62 @@ public class GraphPanel extends JPanel {
     (graphrect.bottom - graphrect.top - ylabelsize.cx) / 2, ylabel, strlen(ylabel));
   SelectObject(dc, oldfont);
   DeleteObject(rotatedfont);
-		
-*/	
-		
+        
+*/    
+        
         // Done!
         return;
     }
     
  
+    // Load log in a separate thread.
+    final class WorkerThread extends Thread
+    {
+        LogParser parser = null;
+        
+        WorkerThread(BufferedReader in, java.util.List logdata) {
+            parser = new LogParser(in, logdata);
+            loggerstate = loadinprogress;
+        }
 
-	public GraphPanel() {
-	
-		// set the default ranges
-		rangestart = -1;
-		rangeend = -1;
-		
-		// set the flags
-		loggerstate = nologloaded;
-	}
-
-
-
-	void readLogData(void)
-	{
-		// reset storage.
-		logdata.Flush();
-		mintime = maxtime = 0;
-		minrate = maxrate = 0;
-		totalkeys = 0;
-		
-		// open up the log.
-		try {
-			BufferedReader in = 
-				new BufferedReader(new FileReader(currentLogFile));
-		}
-		catch( FileNotFoundException e ) {
-			System.out.println("File not found: " + e);
-			loggerstate = lognotfound;
-			return;
-		}
-		
-		// Load log in a separate thread.
-		final SwingWorker worker = new SwingWorker() {
-			
-			LogParser parser = null;
-			
-			public Object construct() {
-				parser = new LogParser(in, logdata);
-				loggerstate = loadinprogress;
-				parser.read();
-				loggerstate = logloaded;
-				return parser;  // not used
-			}
-			
-			// Runs on the event-dispatching thread.
-	        public void finished() {
-	        	repaint();
-	        }
-	    };
-		
-		repaint();
-		
-	}
+        public void run() {
+            parser.read();
+            loggerstate = logloaded;
+            //repaint();
+        }
+    }
 
 
 
+    void readLogData()
+    {
+        // reset storage.
+        logdata.clear();
+        mintime = maxtime = 0;
+        minrate = maxrate = 0.0;
+        totalkeys = 0.0;
+        
+        // open up the log.
+        BufferedReader in;
+        try {
+            in = new BufferedReader(new FileReader(currentLogFile));
+        }
+        catch( FileNotFoundException e ) {
+            System.out.println("File not found: " + e);
+            loggerstate = lognotfound;
+            return;
+        }
+        
+        WorkerThread p = new WorkerThread(in, logdata);
+        p.start();
+        
+        repaint();
+        
+    }
 
+
+
+/*
 public void IterDrawFuncRate(GraphEntry datapoint, void *vptr)
 {
   MyPaintStruct *paintstr = (MyPaintStruct*)vptr;
@@ -299,6 +322,7 @@ public void IterDrawFuncRate(GraphEntry datapoint, void *vptr)
     paintstr->lastrate = datapoint.rate;
   }
 }
+*/
 
 
 
