@@ -1,0 +1,36 @@
+From subotnik@gmx.de Thu Jan 13 12:23:06 2000
+Date: Thu, 13 Jan 2000 14:48:08 +0100
+From: Michael Nahrath <subotnik@gmx.de>
+Subject: Re: Java LogVis update
+
+
+background:
+The MRJ (Macintosh Runtime for Java) installed with MacOs by default is not
+capable of running Java-applications. It can only handle appletts.
+
+There is an application-runner ("JBindery") in the MRJ-SDK (MRJ-Software
+Developement Kit) wich is free downloadable from apples website
+<http://apple.com/java/> but hardly any user has installed it.
+
+I ran the 1.1 with it.
+It's just dragging RC5graph.jar on the JBindery Icon and clicking 'Run'.
+
+You can allso save te program as a MacOs-binary from JBindary, that will
+only require MRJ to be installed.
+
+That's what I did with the corrected RC5graph.jar Yves sent to me last week
+and with the 1.1 today (i had sent Yves some bug-reports on the 1.0).
+
+
+- this binary uses up to 35 MBytes of temorary memory.
+I don't know if this is a problem of JBindery, of your code or if I have
+done something wrong on compiling.
+- A real MacOs application should also include some MacOs-specific
+Information like a Creator-Code, Version-resource etc.
+I can not do that, because i have no programming-experience on MacOs at all.
+
+
+Greeting, Michi
+-- 
+<http://nahrath.de/michael/>
+
