@@ -38,7 +38,7 @@ class AboutDialog extends Dialog
         gbc.insets.left = 60;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
-        add(new Label("distributed.net Log Visualizer v1.0"), gbc);
+        add(new Label("distributed.net Log Visualizer v1.1"), gbc);
         add(new Label("programmed by:"), gbc);
         add(new Label("Jeff \"Bovine\" Lawson <jlawson@bovine.net>"), gbc);
         add(new Label("William Goo <wgoo@hmc.edu>"), gbc);
