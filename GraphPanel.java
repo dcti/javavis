@@ -7,6 +7,7 @@ import java.io.*;
 import java.util.*;
 import java.text.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.FontMetrics;
@@ -14,6 +15,7 @@ import java.awt.FontMetrics;
 
 
 public class GraphPanel extends Panel
+implements MouseMotionListener, MouseListener,ActionListener
 {
     // Empty borders
     protected final int topBorder       = 10;
@@ -43,6 +45,8 @@ public class GraphPanel extends Panel
     public File currentLogFile;
 
     private static String[] months = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+    private int startx = -1;
+    private int endx = -1;
 
 
     // constructor
@@ -54,10 +58,115 @@ public class GraphPanel extends Panel
 
         // set the flags
         loggerstate = nologloaded;
+        addMouseListener(this);
+        addMouseMotionListener(this);
 
         setBackground(Color.lightGray);
     }
 
+	public void actionPerformed(ActionEvent e)
+	{
+		if (e.getActionCommand() == "complete")
+		{
+			setRange(-1,-1);
+			startx = -1;
+			endx = -1;
+			repaint();
+		}
+
+		if (e.getActionCommand() == "today")
+		{
+			Date dt = new Date();
+//			System.out.println(dt);
+			setRange(Date.UTC(dt.getYear(),dt.getMonth(),dt.getDate(),0,0,0)/100,Date.UTC(dt.getYear(),dt.getMonth(),dt.getDate(),0,0,0)/100+864000);
+			startx = -1;
+			endx = -1;
+			repaint();
+		}
+		if (e.getActionCommand() == "yesterday")
+		{
+			Date dt = new Date();
+//			System.out.println(dt);
+			setRange(Date.UTC(dt.getYear(),dt.getMonth(),dt.getDate(),0,0,0)/100-864000,Date.UTC(dt.getYear(),dt.getMonth(),dt.getDate(),0,0,0)/100);
+//			System.out.println(new Date(Date.UTC(dt.getYear(),dt.getMonth(),dt.getDate(),0,0,0)-86400000));
+			startx = -1;
+			endx = -1;
+			repaint();
+		}
+	}
+
+	public void mouseClicked(MouseEvent e)
+	{
+
+	}
+
+	public void mousePressed(MouseEvent e)
+	{
+		if (e.isPopupTrigger())
+		{
+			PopupMenu pm = new PopupMenu("Zoom");
+			pm.show(this,e.getX(),e.getY());
+//			System.out.println("popup");
+		} else
+		{
+    	   	startx = e.getX();
+	       	endx = e.getX()+1;
+    	}
+    	repaint();
+	}
+
+	public void mouseReleased(MouseEvent e)
+	{
+		if (e.isPopupTrigger())
+		{
+			PopupMenu pm = new PopupMenu("Zoom");
+			MenuItem mi = new MenuItem("complete");
+			mi.addActionListener(this);
+			pm.add(mi);
+			add(pm);
+			pm.show(this,e.getX(),e.getY());
+//			System.out.println("popup");
+		} else
+		{
+        if (Math.abs(startx-endx) < 10)
+        {
+     		startx = -1;
+     		endx = -1;
+        }
+        if ( (startx != -1) && (endx != -1 ) )
+        {
+        	if (startx < endx)
+        	  setRange(rangestart+(startx-leftBorder)*(rangeend-rangestart)/width,rangestart+(endx-leftBorder)*(rangeend-rangestart)/width);
+        	if (startx > endx)
+        	  setRange(rangestart+(endx-leftBorder)*(rangeend-rangestart)/width,rangestart+(startx-leftBorder)*(rangeend-rangestart)/width);
+        }
+//		System.out.println(rangestart+" , "+rangeend);
+		startx = -1;
+		endx = -1;
+		}
+		repaint();
+	}
+
+	public void mouseEntered(MouseEvent e)
+	{
+
+	}
+
+	public void mouseExited(MouseEvent e)
+	{
+
+	}
+
+	public void mouseDragged(MouseEvent e)
+	{
+		endx = e.getX();
+		repaint();
+	}
+
+	public void mouseMoved(MouseEvent e)
+	{
+//		endx = e.getX();
+	}
 
     // public interface methods.
     void getDataRange(long start, long end)
@@ -78,10 +187,18 @@ public class GraphPanel extends Panel
               (minrate < maxrate) && (mintime < maxtime); }
 
 
-    public void paint(Graphics g)
+	public void repaint()
+	{
+		paint(getGraphics());
+	}
+
+    public synchronized void paint(Graphics bg)
     {
+		Dimension d = getSize();
+		java.awt.Image img = createImage(d.width,d.height);
+		Graphics g = img.getGraphics();
         // Paint the window background.
-        super.paint(g);
+        //super.paint(g);
 
         if (loggerstate == loadinprogress) {
             g.drawString("Please wait, currently reloading log file.",
@@ -109,7 +226,7 @@ public class GraphPanel extends Panel
 
 
         // Determine dimensions of graph area.
-        Dimension d = this.getSize();
+//        Dimension d = this.getSize();
         width = d.width - (leftBorder + rightBorder);
         height = d.height - (topBorder + bottomBorder);
 
@@ -118,6 +235,10 @@ public class GraphPanel extends Panel
         // determine the range window that we will draw
         long timelo = (rangestart == -1 ? mintime : rangestart);
         long timehi = (rangeend == -1 ? maxtime : rangeend);
+        setRange(timelo,timehi);
+/*        System.out.println(timelo);
+        System.out.println(timehi);*/
+//        timelo += 1000;
         if (timehi <= timelo) return;
 
         FontMetrics fm = g.getFontMetrics();
@@ -151,7 +272,14 @@ public class GraphPanel extends Panel
 				String str = months[dt.getMonth()] +" "+dt.getDate();
 				int length = fm.stringWidth(str) / 2;
                 g.drawString(str,(leftBorder+i)-length,topBorder+height+5+string_height);
-                str = dt.getHours()+":"+dt.getMinutes();
+                str = dt.getHours()+":";
+                if (dt.getMinutes() < 10)
+                {
+                	str += "0"+dt.getMinutes();
+                } else
+                {
+                	str += dt.getMinutes();
+                };
 				length = fm.stringWidth(str) / 2;
                 g.drawString(str,(leftBorder+i)-length,topBorder+height+5+2*string_height);
                 g.drawLine((leftBorder+i),topBorder+height,(leftBorder+i),topBorder+height+5);
@@ -290,6 +418,8 @@ public class GraphPanel extends Panel
                 int tmpy = topBorder + height - (int) ((float) height *
                     (float) (ge.rate - minrate) / (float) (maxrate - minrate));
 
+                if ( (tmpx < leftBorder) || (tmpx > width+leftBorder) ) continue;
+
                 // plot the point.
                 if (!firstpoint)
                 {
@@ -323,7 +453,23 @@ public class GraphPanel extends Panel
         catch (NoSuchElementException e) { }
         g.setClip(null);
 
+		if (startx > 0)
+		{
+			g.setXORMode(Color.black);
+			if (startx < endx)
+			{
+				if (endx > width+leftBorder) endx = width+leftBorder;
+				g.fillRect(startx,topBorder,endx-startx,height);
+			}
+			if (endx < startx)
+			{
+				if (startx > width+leftBorder) startx = width+leftBorder;
+				g.fillRect(endx,topBorder,startx-endx,height);
+			}
+		}
 
+		g.finalize();
+		bg.drawImage(img,0,0,null);
         // Done!
         return;
     }
@@ -341,7 +487,7 @@ public class GraphPanel extends Panel
 
         public void run()
         {
-System.out.println("load in progress");
+			System.out.println("load in progress");
             parser.run();
 
             mintime = maxtime = 0;
@@ -364,7 +510,7 @@ System.out.println("load in progress");
 
             loggerstate = logloaded;
             repaint();
-System.out.println("load complete.  numrecords=" + logdata.size());
+			System.out.println("load complete.  numrecords=" + logdata.size());
         }
     }
 
@@ -391,6 +537,13 @@ System.out.println("load complete.  numrecords=" + logdata.size());
 
         WorkerThread p = new WorkerThread(in);
         p.start();
+        try
+        {
+        	p.join();
+        } catch (InterruptedException e)
+        {
+        }
+        setRange(-1,-1);
         repaint();
     }
 }
